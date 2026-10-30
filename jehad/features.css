@@ -1,0 +1,23 @@
+/* ---------- القرآن: كلمة كلمة ---------- */
+.aw{cursor:pointer}
+.aw.on{background:var(--speak);box-shadow:0 0 0 4px var(--speak)}
+.qhint{background:var(--green-soft);border-radius:16px;padding:10px 16px;margin-top:14px;font-size:calc(var(--fs)*.75);line-height:1.9}
+
+/* ---------- تقسيم الكلمات إلى مقاطع ---------- */
+.sy{border-radius:6px;padding:0 2px}
+.sy1{background:var(--blue-soft)}
+.w .sy + .sy{margin-right:.3em}
+
+/* ---------- حروف تتشابه ---------- */
+.pair-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 14px}
+.ptab{background:var(--surface);border:3px solid transparent;border-radius:16px;padding:8px 18px;font-size:calc(var(--fs)*1.1);font-weight:700;min-height:56px}
+.ptab.active{border-color:var(--blue);background:var(--card)}
+.pair-cues{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.cue{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:12px;text-align:center;line-height:1.6}
+.cue .cue-ico{display:block;font-size:calc(var(--fs)*1.8)}
+.cue small{display:block;font-weight:700;font-size:calc(var(--fs)*.9)}
+.cue p{margin:6px 0 0;font-size:calc(var(--fs)*.7);color:var(--muted);line-height:1.8}
+.choices.two{grid-template-columns:1fr 1fr}
+.pword{text-align:center;font-size:calc(var(--fs)*1.8);font-weight:700;min-height:1.6em;margin:10px 0 0}
+.pword .first{color:var(--orange)}
+.pread{display:inline-block;font-size:calc(var(--fs)*1.25);font-weight:700;background:var(--surface);border-radius:20px;padding:6px 28px;line-height:1.8}

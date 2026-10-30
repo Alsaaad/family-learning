@@ -1,0 +1,27 @@
+/* ---------- 🎧 وحدي + 🔬 مذاكرة ---------- */
+.tabs{grid-template-columns:repeat(4,1fr)}
+@media (max-width:620px){.tabs{grid-template-columns:repeat(4,1fr)}.tab{min-height:80px;padding:8px 2px}}
+.so-lbl{font-weight:600;display:flex;align-items:center;gap:10px}
+.so-sel{font-family:inherit;font-size:calc(var(--fs)*.9);border-radius:14px;border:2px solid var(--line);background:var(--card);min-height:54px;padding:4px 14px}
+.sci-plan{background:var(--green-soft);border-radius:18px;padding:12px 18px;margin:10px 0 14px;font-size:calc(var(--fs)*.75);line-height:1.9}
+.sci-plan ol{margin:4px 0;padding-right:1.3em}
+.muted-s{color:var(--muted);margin:4px 0 0}
+.sci-units{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.sci-unit{background:var(--surface);border:3px solid transparent;border-radius:18px;padding:12px 8px;line-height:1.6;font-size:calc(var(--fs)*.8)}
+.sci-unit b{display:block}
+.sci-unit small{display:block;color:var(--muted);font-size:.8em}
+.sci-unit.done{border-color:var(--green);background:var(--green-soft)}
+.su-ico{display:block;font-size:calc(var(--fs)*1.6)}
+.sci-point{background:var(--surface);border-radius:22px;padding:22px 18px;text-align:center;margin-top:10px}
+.sp-e{font-size:calc(var(--fs)*2.6);line-height:1.3}
+.sci-point p{font-size:calc(var(--fs)*1.15);line-height:2.1;margin:8px 0 0}
+.sci-point mark{background:var(--orange-soft);border-radius:8px;padding:0 6px}
+.sci-type{color:var(--muted);font-weight:600;margin:0}
+.sci-q{font-size:calc(var(--fs)*1.15);font-weight:600;line-height:2;background:var(--surface);border-radius:18px;padding:14px 18px}
+.sci-opts{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.sci-opt{min-height:64px;border-radius:18px;border:3px solid var(--line);background:var(--card);font-size:calc(var(--fs)*.95);font-weight:600;text-align:right;padding:8px 18px}
+.sci-opt.right{background:var(--green-soft);border-color:var(--green)}
+.sci-opt.wrong{background:var(--orange-soft);border-color:var(--orange)}
+.sci-why{background:var(--blue-soft);border-radius:16px;padding:12px 16px;margin-top:14px;font-weight:600;line-height:1.9}
+.sci-why.ok{background:var(--green-soft)}
+.sci-end{text-align:center}

@@ -1,0 +1,21 @@
+/* ---------- دليل المعلّم ---------- */
+.gwrap{position:fixed;inset:0;z-index:70;display:none;align-items:flex-start;justify-content:center;
+  padding:16px;overflow-y:auto;background:rgba(26,26,46,.45);-webkit-overflow-scrolling:touch}
+.gwrap.open{display:flex}
+.gbox{background:var(--card);border-radius:24px;max-width:820px;width:100%;margin:8px 0 40px;
+  padding:18px 22px 24px;font-size:calc(var(--fs)*.78);line-height:2;box-shadow:0 20px 60px rgba(26,26,46,.25)}
+.ghead{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  position:sticky;top:-18px;background:var(--card);padding:10px 0;z-index:1;border-bottom:2px solid var(--line)}
+.ghead h2{font-size:calc(var(--fs)*1.2)}
+.gbox section{margin-top:16px}
+.gbox h3{font-size:calc(var(--fs)*.95);margin:0 0 4px;color:var(--orange)}
+.gbox ul,.gbox ol{margin:0;padding-right:1.3em}
+.gbox li{margin-bottom:6px}
+.gtemplate{background:var(--surface);border-radius:16px;padding:12px 16px;white-space:pre-wrap;
+  font-family:inherit;font-size:calc(var(--fs)*.72);line-height:2;margin:8px 0 0;direction:rtl;text-align:right}
+
+.tguide{background:var(--green-soft);border-radius:16px;padding:6px 16px;margin-bottom:14px;font-size:calc(var(--fs)*.72);line-height:1.9}
+.tguide summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center}
+.tguide ul{margin:4px 0 8px;padding-right:1.2em}
+.tguide li{margin-bottom:4px}
+.tguide-more{margin-bottom:8px}

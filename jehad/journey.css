@@ -1,0 +1,23 @@
+/* ---------- 🗺️ رحلتي ---------- */
+.journey{background:var(--surface);border-radius:20px;padding:10px 14px;margin:10px 0;text-align:right}
+.journey h3{margin:0 0 2px}
+.j-lbl{margin:8px 0 4px;font-weight:700;font-size:calc(var(--fs)*.72);color:var(--muted)}
+.j-path{display:flex;align-items:center;gap:4px;overflow-x:auto;padding:4px 2px 10px;-webkit-overflow-scrolling:touch}
+.j-node{flex:0 0 auto;min-width:118px;background:var(--card);border:3px solid var(--line);border-radius:18px;padding:8px 10px;text-align:center;line-height:1.5;font-size:calc(var(--fs)*.68)}
+.j-node b{display:block;font-size:1.05em}
+.j-node small{display:block;color:var(--muted);font-weight:400}
+.j-ico{display:block;font-size:calc(var(--fs)*1.4)}
+.j-node.cur{border-color:var(--orange);background:var(--orange-soft);animation:glow 3s ease-in-out infinite}
+.j-node.done{border-color:var(--green);background:var(--green-soft)}
+.j-node.locked{opacity:.55}
+.j-link{flex:0 0 16px;height:4px;background:var(--line);border-radius:2px}
+.afx{color:#2F7A4C;font-weight:700;text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:9px;text-decoration-color:#7FC39A}
+.m-qclock{margin:0 0 10px;font-size:calc(var(--fs)*.72);color:var(--muted);font-weight:600}
+.m-timeup{background:var(--orange-soft);border-radius:18px;padding:12px 16px;margin:0 0 12px;font-weight:600;text-align:center;line-height:1.9}
+.gloss{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:10px 14px;margin-top:12px;text-align:right;font-size:calc(var(--fs)*.75);line-height:1.8}
+.gloss b{display:block;margin-bottom:4px}
+.gl{display:flex;align-items:center;gap:10px;padding:4px 0;border-top:1px dashed var(--line)}
+.gl-e{font-size:1.5em}
+.gl-w{font-family:"Amiri Quran","Amiri",serif;font-size:1.35em;font-weight:700;min-width:5em}
+.gl-m{color:var(--muted)}
+.m-stageup{background:var(--gold);border-radius:18px;padding:10px 16px;font-weight:700;font-size:calc(var(--fs)*1.05)}

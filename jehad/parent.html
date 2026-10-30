@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="متابعة جهاد">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>متابعة جهاد</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FDFBF7; --surface:#F4F1EA; --card:#FAF6EE; --ink:#1A1A2E; --muted:#55556A; --line:#E4DCCD;
+  --orange:#E67E22; --orange-soft:#FBE3CC; --green:#3E8A5B; --green-soft:#DCEFE2; --gold:#F2B43A; --blue:#2F80C0; --blue-soft:#D8EAF7;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Readex Pro","Geeza Pro",Tahoma,sans-serif;font-size:17px;line-height:1.8}
+.wrap{max-width:900px;margin:0 auto;padding:16px 16px 60px;padding-top:max(16px,env(safe-area-inset-top))}
+h1{font-size:24px;margin:0}
+h2{font-size:19px;margin:0 0 8px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.muted{color:var(--muted);font-size:14px}
+.btn{font-family:inherit;font-size:15px;font-weight:600;border-radius:14px;border:2px solid var(--line);background:var(--surface);padding:8px 16px;min-height:44px;cursor:pointer;color:var(--ink)}
+.btn.primary{background:var(--orange);border-color:var(--orange);color:var(--bg)}
+.card{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:16px 18px;margin-bottom:14px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.tile{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:12px 14px}
+.tile .lbl{font-size:13px;color:var(--muted);font-weight:600}
+.tile .val{font-size:26px;font-weight:700;line-height:1.4}
+.tile .sub{font-size:13px;color:var(--muted)}
+.alert{border-radius:16px;padding:10px 14px;margin-bottom:14px;font-weight:600}
+.alert.warn{background:var(--orange-soft)}
+.alert.good{background:var(--green-soft)}
+.stage{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:4px 0}
+.stage b{min-width:70px}
+.meter{margin:10px 0}
+.meter .row{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.meter .track{height:12px;border-radius:999px;background:var(--line);overflow:hidden;margin-top:4px}
+.meter .fill{height:100%;border-radius:999px;background:var(--green)}
+.days{display:grid;grid-template-columns:repeat(14,1fr);gap:4px;margin-top:6px}
+.day{aspect-ratio:1;border-radius:8px;background:var(--surface);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--muted);position:relative}
+.day.on{background:var(--green);border-color:var(--green);color:var(--bg)}
+.day.today{outline:3px solid var(--orange);outline-offset:1px}
+.days-lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--orange-soft);border-radius:999px;padding:2px 14px;font-size:18px;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:right;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:600}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.pct{display:inline-block;min-width:44px}
+.ok{color:var(--green);font-weight:700}
+.lo{color:#B4541A;font-weight:700}
+details.sess summary{cursor:pointer;color:var(--blue);font-weight:600;font-size:14px}
+pre{white-space:pre-wrap;font-family:inherit;background:var(--surface);border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.9;margin:6px 0 0}
+.login{max-width:420px;margin:40px auto;text-align:center}
+.login input{font-family:inherit;font-size:20px;border-radius:14px;border:2px solid var(--line);padding:8px 14px;width:100%;margin:10px 0;text-align:center;background:var(--card)}
+.guide li{margin-bottom:6px}
+@media (max-width:560px){.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><p class="muted">… جارٍ التحميل</p></div>
+
+<script src="sync-config.js?v=1"></script>
+<script>
+(() => {
+  const C = window.JEHAD_SYNC || {};
+  const app = document.getElementById('app');
+  const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const pct = (a, b) => b ? Math.round(a / b * 100) : null;
+  const KEY = 'jehad-parent-code';
+  let code = new URLSearchParams(location.search).get('code');
+  try { if (code) localStorage.setItem(KEY, code); else code = localStorage.getItem(KEY); } catch (e) {}
+
+  async function load() {
+    const r = await fetch(`${C.url}/api/query`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: 'progress:dashboard', args: { code: code || '', kid: C.kid || 'jehad' }, format: 'json' })
+    });
+    const j = await r.json();
+    if (j.status !== 'success') throw new Error(j.errorMessage || 'error');
+    return j.value;
+  }
+
+  function login(msg) {
+    app.innerHTML = `<div class="login card">
+      <h1>📊 متابعة جهاد</h1>
+      <p class="muted">${msg || 'أدخل رمز المتابعة'}</p>
+      <input id="code" autocomplete="off" placeholder="رمز المتابعة">
+      <button class="btn primary" id="go">دخول</button></div>`;
+    document.getElementById('go').onclick = () => {
+      code = document.getElementById('code').value.trim();
+      try { localStorage.setItem(KEY, code); } catch (e) {}
+      refresh();
+    };
+  }
+
+  function ago(ts) {
+    if (!ts) return '—';
+    const m = Math.round((Date.now() - ts) / 60000);
+    if (m < 2) return 'الآن';
+    if (m < 60) return `قبل ${ar(m)} دقيقة`;
+    const h = Math.round(m / 60);
+    if (h < 24) return `قبل ${ar(h)} ساعة`;
+    return `قبل ${ar(Math.round(h / 24))} يوم`;
+  }
+  const dateKey = d => d.toLocaleDateString('en-CA');
+  const pctCell = (o) => {
+    if (!o || !o.n) return '—';
+    const p = pct(o.ok, o.n);
+    return `<span class="pct ${p >= 80 ? 'ok' : p < 60 ? 'lo' : ''}">${ar(p)}٪</span> <span class="muted">(${ar(o.ok)}/${ar(o.n)})</span>`;
+  };
+
+  function render(data) {
+    const P = (data.snapshot && data.snapshot.progress) || {};
+    const S = data.sessions || [];
+    const days = new Set(S.map(s => s.date));
+    const todayK = dateKey(new Date());
+
+    // آخر ٧ مهام: متوسط الدقة من أول مرة
+    const last7 = S.slice(0, 7);
+    const sum = k => last7.reduce((a, s) => { const o = s.stats && s.stats[k]; return o && o.n ? [a[0] + o.ok, a[1] + o.n] : a; }, [0, 0]);
+    const pp = sum('pairs'), pw = sum('words'), ps = sum('story');
+    const pairsP = pct(pp[0], pp[1]), wordsP = pct(pw[0], pw[1]), storyP = pct(ps[0], ps[1]);
+    const lastMood = (S.find(s => s.stats && s.stats.mood) || {}).stats;
+
+    // تنبيهات بسيطة
+    const alerts = [];
+    const lastDate = S[0] ? S[0].date : null;
+    if (lastDate) {
+      const gap = Math.round((new Date(todayK) - new Date(lastDate)) / 864e5);
+      if (gap >= 2) alerts.push(['warn', `⚠️ آخر مهمة كانت قبل ${ar(gap)} أيام.`]);
+    } else alerts.push(['warn', 'لم تُسجَّل أي مهمة بعد. ستظهر هنا بعد أول مهمة يُنهيها جهاد.']);
+    if (last7.length >= 3 && pairsP !== null && pairsP < 70) alerts.push(['warn', `🔥 دقّة الحروف المتشابهة ${ar(pairsP)}٪ في آخر المهام — تحتاج تركيزًا.`]);
+    if (last7.length >= 3 && pairsP >= 90) alerts.push(['good', `✅ دقّة الحروف المتشابهة ${ar(pairsP)}٪ — ممتاز، يمكن إضافة زوج جديد.`]);
+    const moods = last7.map(s => s.stats && s.stats.mood).filter(Boolean);
+    if (moods.filter(m => m.includes('متعب')).length >= 2) alerts.push(['warn', '😫 بدا متعبًا في أكثر من مهمة — جرّبوا وقتًا آخر من اليوم أو مهمة أقصر.']);
+
+    // شريط ١٤ يومًا
+    const strip = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 864e5), k = dateKey(d);
+      strip.push(`<div class="day ${days.has(k) ? 'on' : ''} ${k === todayK ? 'today' : ''}" title="${k}">${days.has(k) ? '✓' : ar(d.getDate())}</div>`);
+    }
+
+    const levels = (P.levels || []).map(l => `
+      <div class="meter"><div class="row"><span>📖 ${esc(l.name)}</span><b>${ar(l.done)} من ${ar(l.total)} قصص</b></div>
+      <div class="track"><div class="fill" style="width:${pct(l.done, l.total) || 0}%"></div></div></div>`).join('');
+    const ayat = (P.ayatDone || []).length, ayatT = P.ayatTotal || 19;
+
+    app.innerHTML = `
+      <div class="top">
+        <div><h1>📊 متابعة ${esc(P.name || 'جهاد')}</h1>
+        <span class="muted">آخر تحديث من الآيباد: ${ago(data.snapshot && data.snapshot.updatedAt)}</span></div>
+        <button class="btn" id="refresh">🔄 تحديث</button>
+      </div>
+
+      ${alerts.map(([t, m]) => `<div class="alert ${t}">${m}</div>`).join('')}
+
+      <div class="tiles">
+        <div class="tile"><div class="lbl">🔥 أيام متتالية</div><div class="val">${ar(P.streak || 0)}</div><div class="sub">آخر مهمة: ${lastDate ? esc(lastDate) : '—'}</div></div>
+        <div class="tile"><div class="lbl">🚀 مهام آخر ١٤ يومًا</div><div class="val">${ar(strip.filter(x => x.includes(' on ')).length)}</div><div class="sub">من ١٤ يومًا</div></div>
+        <div class="tile"><div class="lbl">🔤 حروف متشابهة (آخر ٧ مهام)</div><div class="val">${pairsP === null ? '—' : ar(pairsP) + '٪'}</div><div class="sub">من أول مرة</div></div>
+        <div class="tile"><div class="lbl">📖 أسطر القصص (آخر ٧ مهام)</div><div class="val">${storyP === null ? '—' : ar(storyP) + '٪'}</div><div class="sub">كلمات طويلة: ${wordsP === null ? '—' : ar(wordsP) + '٪'}</div></div>
+      </div>
+
+      <div class="card">
+        <h2>🗺️ المرحلة الحالية</h2>
+        <div class="stage"><b>القراءة</b><span>${esc((P.stage && P.stage.reading) || '—')}</span></div>
+        <div class="stage"><b>القرآن</b><span>${esc((P.stage && P.stage.quran) || '—')}</span></div>
+        ${levels}
+        <div class="meter"><div class="row"><span>🌙 ${esc(P.surahName || 'القرآن')}</span><b>${ar(ayat)} من ${ar(ayatT)} آيات محفوظة</b></div>
+        <div class="track"><div class="fill" style="width:${pct(ayat, ayatT) || 0}%"></div></div></div>
+        ${P.qNew ? `<p class="muted">الآية التي يعمل عليها الآن: ${ar(P.qNew)}</p>` : ''}
+      </div>
+
+      <div class="card">
+        <h2>📅 الالتزام — آخر ١٤ يومًا</h2>
+        <div class="days">${strip.join('')}</div>
+        <div class="days-lbl"><span>قبل أسبوعين</span><span>اليوم</span></div>
+        <p class="muted">✓ = أنهى مهمة ذلك اليوم.</p>
+      </div>
+
+      <div class="card">
+        <h2>🔁 كلمات وحروف يتعثّر فيها الآن</h2>
+        ${(P.trouble || []).length ? `<div class="chips">${P.trouble.map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>
+          <p class="muted">تعود تلقائيًا في مهمة الغد، وتختفي حين يقرؤها صحيحة من أول مرة.</p>` : '<p class="muted">لا شيء حاليًا 👍</p>'}
+      </div>
+
+      <div class="card">
+        <h2>🧾 سجل المهام</h2>
+        ${S.length ? `<table>
+          <thead><tr><th>التاريخ</th><th>حروف</th><th class="hide-sm">كلمات</th><th>قصة</th><th class="hide-sm">مدة</th><th>مزاج</th></tr></thead>
+          <tbody>${S.slice(0, 30).map(s => {
+            const t = s.stats || {};
+            return `<tr>
+              <td class="num">${esc(s.date)}</td>
+              <td class="num">${pctCell(t.pairs)}</td>
+              <td class="num hide-sm">${pctCell(t.words)}</td>
+              <td>${esc((t.story && t.story.title) || '')} ${t.story && t.story.done ? '✅' : ''}<br>${pctCell(t.story)}</td>
+              <td class="num hide-sm">${t.dur ? ar(t.dur) + ' د' : '—'}</td>
+              <td>${esc(t.mood || '—')}</td>
+            </tr>
+            <tr><td colspan="6"><details class="sess"><summary>الملخص الكامل</summary><pre>${esc(s.summary)}</pre></details></td></tr>`;
+          }).join('')}</tbody></table>` : '<p class="muted">لا توجد مهام بعد.</p>'}
+      </div>
+
+      <div class="card guide">
+        <h2>🧭 كيف أقرأ هذه الصفحة؟</h2>
+        <ul>
+          <li><b>الحروف المتشابهة فوق ٩٠٪</b> لأسبوع ← أخبر Claude ليضيف زوجًا جديدًا أو يقلّل الإحماء.</li>
+          <li><b>أسطر القصص تحت ٦٠٪</b> ← المرحلة صعبة عليه، اطلب قصصًا أسهل في نفس المرحلة.</li>
+          <li><b>نفس الكلمة في «يتعثّر فيها» أكثر من أسبوع</b> ← أرسلها لـ Claude ليبني لها تمرينًا خاصًا.</li>
+          <li><b>أيام فارغة كثيرة</b> ← المشكلة في الروتين لا في جهاد. حدّدوا وقتًا ثابتًا للمهمة.</li>
+        </ul>
+      </div>`;
+    document.getElementById('refresh').onclick = refresh;
+  }
+
+  async function refresh() {
+    if (!C.url) { app.innerHTML = '<p>إعداد المزامنة غير موجود.</p>'; return; }
+    if (!code) return login();
+    try {
+      const data = await load();
+      if (!data) return login('الرمز غير صحيح، حاول مرة أخرى.');
+      render(data);
+    } catch (e) {
+      app.innerHTML = `<div class="card"><p>تعذّر الاتصال. تأكد من الإنترنت ثم اضغط تحديث.</p><button class="btn" id="refresh">🔄 تحديث</button></div>`;
+      document.getElementById('refresh').onclick = refresh;
+    }
+  }
+  refresh();
+  setInterval(() => { if (document.visibilityState === 'visible' && code) refresh(); }, 120000);
+})();
+</script>
+</body>
+</html>
