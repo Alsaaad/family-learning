@@ -1,6 +1,6 @@
 // ينقل سجل جهاد من القاعدة القديمة (Macaly) إلى الجديدة — آمن لو تكرر
 import fs from 'fs'
-const OLD = 'https://modest-buzzard-935.eu-west-1.convex.cloud', NEW = 'https://bright-fly-404.convex.cloud'
+const OLD = 'https://modest-buzzard-935.eu-west-1.convex.cloud', NEW = 'https://cheerful-civet-746.convex.cloud'
 const W = fs.readFileSync('jehad/sync-config.js', 'utf8').match(/code: '([^']+)'/)[1]
 const call = async (url, kind, path, args) => {
   const r = await fetch(`${url}/api/${kind}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path, args, format: 'json' }) })
