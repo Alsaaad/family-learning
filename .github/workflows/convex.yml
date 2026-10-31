@@ -16,7 +16,9 @@ jobs:
         with: { node-version: 20 }
       - run: npm install
       - name: Push functions
-        run: npx convex dev --once --typecheck disable
+        run: |
+          if [ -z "$CONVEX_DEPLOY_KEY" ]; then echo "::error::CONVEX_DEPLOY_KEY secret is missing"; exit 1; fi
+          npx convex dev --once --typecheck disable > /tmp/o.txt 2>&1 || { echo "::error::$(tail -c 900 /tmp/o.txt | tr '\n' ' ')"; exit 1; }
       - name: Set codes
         run: |
           npx convex env set WRITE_CODE "$(node -e "console.log(require('fs').readFileSync('jehad/sync-config.js','utf8').match(/code: '([^']+)'/)[1])")"
