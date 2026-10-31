@@ -24,3 +24,5 @@ jobs:
         run: |
           node scripts/migrate.mjs > /tmp/o.txt 2>&1 || { echo "::error::$(LC_ALL=C tr -cd 'A-Za-z0-9 :._/{}",-' < /tmp/o.txt | head -c 500)"; exit 1; }
           echo "::notice::$(tr "\n" " " < /tmp/o.txt)"
+      - name: Status
+        run: echo "::notice::$(node scripts/status.mjs 2>&1 | tr '\n' ' ')"
