@@ -19,6 +19,8 @@ jobs:
         run: |
           if [ -z "$CONVEX_DEPLOY_KEY" ]; then echo "::error::CONVEX_DEPLOY_KEY secret is missing"; exit 1; fi
           npx convex deploy --typecheck disable -y > /tmp/o.txt 2>&1 || { echo "::error::$(tail -c 900 /tmp/o.txt | tr '\n' ' ')"; exit 1; }
+          echo "::notice::$(LC_ALL=C tr -cd 'A-Za-z0-9 :._/{}",-' < /tmp/o.txt | tail -c 600)"
+          curl -s -X POST https://bright-fly-404.convex.cloud/api/query -H 'Content-Type: application/json' -d '{"path":"progress:dashboard","args":{"code":"x","kid":"jehad"},"format":"json"}' > /tmp/q.txt; echo "::notice::probe $(LC_ALL=C tr -cd 'A-Za-z0-9 :._/{}",-' < /tmp/q.txt | head -c 300)"
       - name: Import Jehad history (safe to repeat)
         run: |
           node scripts/migrate.mjs > /tmp/o.txt 2>&1 || { echo "::error::$(LC_ALL=C tr -cd 'A-Za-z0-9 :._/{}",-' < /tmp/o.txt | head -c 500)"; exit 1; }
