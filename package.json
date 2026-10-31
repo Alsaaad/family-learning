@@ -1,0 +1,1 @@
+{ "name": "family-learning", "private": true, "type": "module", "dependencies": { "convex": "^1.17.0" } }

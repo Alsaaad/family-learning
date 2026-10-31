@@ -1,0 +1,27 @@
+name: Deploy Convex
+on:
+  push:
+    branches: [main]
+    paths: ['convex/**', '.github/workflows/convex.yml', 'scripts/migrate.mjs']
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+      PARENT_CODE: ${{ secrets.PARENT_CODE }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install
+      - name: Push functions
+        run: npx convex dev --once --typecheck disable
+      - name: Set codes
+        run: |
+          npx convex env set WRITE_CODE "$(node -e "console.log(require('fs').readFileSync('jehad/sync-config.js','utf8').match(/code: '([^']+)'/)[1])")"
+          npx convex env set PARENT_CODE "$PARENT_CODE"
+      - name: Import Jehad history (safe to repeat)
+        run: |
+          node scripts/migrate.mjs > /tmp/m.json
+          npx convex run migrate:importSessions "$(cat /tmp/m.json)"
