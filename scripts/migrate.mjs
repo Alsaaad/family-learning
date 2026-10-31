@@ -18,3 +18,8 @@ const have = new Set((await call(NEW, 'query', 'records:all', {})).map(r => r.pa
 let k = 0
 for (const r of rows) if (!have.has(r.path)) { await call(NEW, 'mutation', 'records:put', { path: r.path, data: r.data }); k++ }
 console.log(`jawad: copied ${k} of ${rows.length} records`)
+
+// جهاد: الحالة الكاملة (القصص، الآيات، النجوم، الأرشيف…) — تُقرأ من القديمة عبر دمج حالة فارغة، ثم تُدمج في الجديدة
+const oldState = await call(OLD, 'mutation', 'kidState:mergeState', { code: W, kid: 'jehad', state: {} })
+const merged = await call(NEW, 'mutation', 'kidState:mergeState', { code: W, kid: 'jehad', state: oldState })
+console.log(`jehad state: stars=${merged.stars} stories=${Object.keys(merged.stories || {}).length} ayat=${Object.keys(merged.ayat || {}).length} surah=${merged.qSurah}`)
