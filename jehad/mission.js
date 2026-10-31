@@ -203,6 +203,7 @@
   function mark(c, okv) { const r = M.res[c.id] || { tries: 0 }; r.tries++; r.ok = okv; M.res[c.id] = r; return r; }
   function passAyah(c, r) {
     if (r.tries !== 1) return;
+    window.FamilyPass && FamilyPass.progress('quran');
     state.ayahPass = state.ayahPass || {};
     const d = state.ayahPass[c.ayah] || [];
     if (!d.includes(M.date)) d.push(M.date);
@@ -210,6 +211,7 @@
     if (d.length >= 2 && !state.ayat[c.ayah]) {
       state.ayat[c.ayah] = true;
       M.memorized = (M.memorized || []).concat(c.ayah);
+      window.FamilyPass && FamilyPass.progress('memorize');
       setTimeout(() => { confetti(200); toast(`🏅 حفظتَ الآية ${ar(c.ayah + 1)}!`); }, 400);
     }
   }
@@ -267,6 +269,7 @@
     let extra = 0;
     const okRatio = lines.length ? (lines.length - errs) / lines.length : 0;
     if (st && lines.length && !state.stories[st.id] && okRatio >= CONFIG.storyPass) { state.stories[st.id] = true; M.storyDone = true; extra += 3; }
+    if (M.storyDone) window.FamilyPass && FamilyPass.progress('story');
     const nwCards = M.plan.filter(c => c.isNew);
     if (nwCards.some(c => M.res[c.id] && M.res[c.id].ok)) {
       state.qIntro = state.qIntro || {};
@@ -290,6 +293,7 @@
     award(5 + extra, `أنجزت مهمة اليوم يا ${state.name}! 🚀`, true);
     if (M.stageUp && M.stageUp.length) setTimeout(() => { confetti(260); toast(`🎉 فتحت مرحلة جديدة: ${M.stageUp.join(' — ')}`); }, 2600);
     report();
+    if (window.FamilyPass) { FamilyPass.progress('mission'); FamilyPass.victory('أنجزت مهمة اليوم!'); }
     if (window.renderLevels) { renderLevels(); renderShelf(); renderStory(); }
     if (window.renderAyah) renderAyah();
   }

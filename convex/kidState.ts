@@ -95,6 +95,13 @@ export function mergeStates(a: S | null, b: S): S {
     out.qSurah = src.qSurah
     out.qSurahSince = src.qSurahSince
   }
+  // الباتل باس: النسخة الأحدث (rev) تفوز، والمقتنيات تُجمع من الجهتين
+  if (a.pass || inc.pass) {
+    const pa = a.pass || {}, pb = inc.pass || {}
+    const win = (pb.rev || 0) >= (pa.rev || 0) ? pb : pa
+    out.pass = { ...win, xp: Math.max(pa.xp || 0, pb.xp || 0),
+      owned: Array.from(new Set([...(pa.owned || []), ...(pb.owned || [])])) }
+  }
   out.quranArchive = { ...(a.quranArchive || {}), ...(inc.quranArchive || {}) }
   return out
 }

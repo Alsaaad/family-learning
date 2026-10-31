@@ -32,10 +32,14 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);mi
 .rec .s{font-size:13px;color:var(--muted);flex:1}
 .muted{color:var(--muted);font-size:14px}
 </style>
+<link rel="stylesheet" href="../shared/pass.css?v=1">
+<style>.fp-host{max-width:720px;margin:0 auto;padding:12px 16px 0;display:flex;justify-content:flex-start}</style>
 </head>
 <body>
+<div class="fp-host" id="fpHost"></div>
 <div class="wrap" id="app"><p class="muted">جارٍ التحميل…</p></div>
 <script src="https://cdn.jsdelivr.net/npm/convex@1.42.2/dist/browser.bundle.js"></script>
+<script src="../shared/pass.js?v=1"></script>
 <script>
 const WEEKS = [
   ['بَ','بُ','مَ','مُ','لَ','لُ','سَ','سُ'],
@@ -87,7 +91,7 @@ async function choose(i, btn){
   const right = g.cur.opts[i] === g.cur.item;
   if(g.tries === 0) g.log.push({item:g.cur.item, ok:right, at:Date.now()});
   if(right){
-    btn.classList.add('win'); if(g.tries===0) g.stars++;
+    btn.classList.add('win'); if(g.tries===0){ g.stars++; if(window.FamilyPass && put) FamilyPass.xp(50); }
     $('#msg').textContent = ['ممتاز!','رائع!','أحسنت!','بطل!'][Math.floor(Math.random()*4)];
     document.querySelector('.stars').textContent = '⭐ ' + g.stars;
     saveLog(); g.n++; setTimeout(next, 1100);
@@ -102,6 +106,7 @@ async function choose(i, btn){
   }
 }
 function endGame(){
+  if(window.FamilyPass && put){ FamilyPass.xp(300, 'خلصت الجولة'); FamilyPass.progress('round'); if(g.stars >= 8) FamilyPass.progress('stars8'); FamilyPass.victory('خلصت الجولة!'); }
   $('#app').innerHTML = `<div class="end"><div class="big">🏆</div><h2>خلصت الجولة!</h2><p style="font-size:26px;color:var(--star)">⭐ ${g.stars}</p>
     <button class="btn primary" id="again">العب مرة ثانية</button></div>`;
   $('#again').onclick = newGame;
@@ -152,6 +157,23 @@ async function toggleRec(item){
   setTimeout(() => { if(mr && recItem === item) mr.stop(); }, 4000);
 }
 
+/* ---------- 🎮 الباتل باس ---------- */
+function setupPass(){
+  if(!window.FamilyPass) return;
+  FamilyPass.init({
+    kid: 'jawad', name: 'باتل باس جواد',
+    load: () => recs['pass/jawad'],
+    save: d => { recs['pass/jawad'] = JSON.parse(JSON.stringify(d)); put('pass/jawad', recs['pass/jawad']).catch(()=>{}); },
+    host: document.getElementById('fpHost'),
+    quests: [
+      { id: 'round', icon: '🎧', title: 'العب جولة كاملة', xp: 300 },
+      { id: 'stars8', icon: '⭐', title: 'اجمع ٨ نجوم في جولة', xp: 400 },
+      { id: 'round', key: 'round3', icon: '🔁', title: 'العب ٣ جولات', xp: 600, goal: 3 }
+    ],
+    weekly: [ { id: 'round', icon: '🔥', title: 'العب ١٠ جولات هذا الأسبوع', xp: 2000, goal: 10 } ]
+  });
+}
+
 /* ---------- Start ---------- */
 function render(){
   if(REC) return renderRec();
@@ -171,8 +193,9 @@ else {
   const client = new convex.ConvexClient("https://cheerful-civet-746.convex.cloud");
   put = (path, data) => client.mutation(convex.anyApi.records.put, {path, data});
   client.onUpdate(convex.anyApi.records.all, {}, rows => {
-    rows.forEach(r => { if(r.path.startsWith('plan/')) recs[r.path] = r.data; });
-    if(!ready){ ready = true; render(); }
+    rows.forEach(r => { if(r.path.startsWith('plan/') || r.path === 'pass/jawad') recs[r.path] = r.data; });
+    if(!ready){ ready = true; if(!REC) setupPass(); render(); }
+    else if(window.FamilyPass) FamilyPass.reload();
     else if(REC && !mr) renderRec();
   });
 }

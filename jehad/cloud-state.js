@@ -29,6 +29,7 @@
     const localMission = state.mission;
     Object.keys(merged).forEach(k => { state[k] = merged[k]; });
     Object.assign(state, keep);
+    if (window.FamilyPass) FamilyPass.reload();
     if (!initial && localMission) state.mission = localMission; // لا نلمس مهمة جارية على هذا الجهاز
     origSave();
   }

@@ -268,6 +268,7 @@ textarea:focus{outline:3px solid var(--blue-soft)}
 <link rel="stylesheet" href="mission.css?v=1">
 <link rel="stylesheet" href="journey.css?v=3">
 <link rel="stylesheet" href="extra.css?v=1">
+<link rel="stylesheet" href="../shared/pass.css?v=1">
 </head>
 <body>
 <canvas id="confetti" aria-hidden="true"></canvas>
@@ -774,6 +775,7 @@ $('#storyDone').onclick = () => {
   const st = curStory(); if(!st) return;
   if(!state.stories[st.id]){
     state.stories[st.id] = true;
+    if(window.FamilyPass) FamilyPass.progress('story');
     award(3, `رائع يا ${state.name}! أنهيت قصة «${stripMarks(st.title)}» 📚`);
   } else {
     award(1, 'القراءة مرة أخرى تقوّي الدماغ 💪');
@@ -897,10 +899,12 @@ showTab(state.tab || 'stories');
 <script src="pairs.js?v=2"></script>
 <script src="stages.js?v=3"></script>
 <script src="sync.js?v=3"></script>
-<script src="mission.js?v=7"></script>
+<script src="../shared/pass.js?v=1"></script>
+<script src="pass-setup.js?v=1"></script>
+<script src="mission.js?v=8"></script>
 <script src="guide.js?v=3"></script>
-<script src="solo.js?v=1"></script>
+<script src="solo.js?v=2"></script>
 <!-- science-ui.js: قسم مذاكرة الاختبارات — يُفعَّل عند الحاجة -->
-<script src="cloud-state.js?v=1"></script>
+<script src="cloud-state.js?v=2"></script>
 </body>
 </html>

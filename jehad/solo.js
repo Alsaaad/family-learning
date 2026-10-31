@@ -28,6 +28,7 @@
   function log(kind, n) {
     state.soloLog = state.soloLog.concat({ date: today(), kind, ayah: cur + 1, n, t: Date.now() }).slice(-100);
     save();
+    if (window.FamilyPass) FamilyPass.progress('listen');
   }
   function stop() { sid++; busy = false; if (window.stopAyah) stopAyah(); lbl(''); hl(-1); setBtns(); }
   const lbl = t => { const e = document.getElementById('soLbl'); if (e) e.textContent = t; };
