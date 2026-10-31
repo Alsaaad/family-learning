@@ -19,12 +19,6 @@ jobs:
         run: |
           if [ -z "$CONVEX_DEPLOY_KEY" ]; then echo "::error::CONVEX_DEPLOY_KEY secret is missing"; exit 1; fi
           npx convex deploy --typecheck disable -y > /tmp/o.txt 2>&1 || { echo "::error::$(tail -c 900 /tmp/o.txt | tr '\n' ' ')"; exit 1; }
-      - name: Set codes
-        run: |
-          if [ -z "$PARENT_CODE" ]; then echo "::error::PARENT_CODE secret is missing"; exit 1; fi
-          W=$(grep -o "code: '[^']*'" jehad/sync-config.js | cut -d"'" -f2)
-          npx convex env set WRITE_CODE "$W" > /tmp/o.txt 2>&1 || { echo "::error::$(tail -c 600 /tmp/o.txt | tr '\n' ' ')"; exit 1; }
-          npx convex env set PARENT_CODE "$PARENT_CODE" > /tmp/o.txt 2>&1 || { echo "::error::$(tail -c 600 /tmp/o.txt | tr '\n' ' ')"; exit 1; }
       - name: Import Jehad history (safe to repeat)
         run: |
           node scripts/migrate.mjs > /tmp/m.json

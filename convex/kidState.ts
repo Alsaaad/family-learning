@@ -1,5 +1,6 @@
 import { mutation } from "./_generated/server"
 import { v } from "convex/values"
+import { WRITE_CODE } from "./codes"
 
 const KID = /^[a-z0-9-]{1,32}$/
 type S = Record<string, any>
@@ -102,7 +103,7 @@ export function mergeStates(a: S | null, b: S): S {
 export const mergeState = mutation({
   args: { code: v.string(), kid: v.string(), state: v.any() },
   handler: async (ctx, a) => {
-    if (!process.env.WRITE_CODE || a.code !== process.env.WRITE_CODE) throw new Error("unauthorized")
+    if (a.code !== WRITE_CODE) throw new Error("unauthorized")
     if (!KID.test(a.kid)) throw new Error("bad kid")
     const doc = await ctx.db
       .query("kidState")

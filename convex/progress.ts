@@ -1,11 +1,11 @@
 import { mutation, query } from "./_generated/server"
 import { v } from "convex/values"
+import { WRITE_CODE, isParent } from "./codes"
 
 const KID = /^[a-z0-9-]{1,32}$/
 
 function assertWrite(code: string, kid: string) {
-  const expected = process.env.WRITE_CODE
-  if (!expected || code !== expected) throw new Error("unauthorized")
+  if (code !== WRITE_CODE) throw new Error("unauthorized")
   if (!KID.test(kid)) throw new Error("bad kid")
 }
 
@@ -69,8 +69,7 @@ export const snapshot = mutation({
 export const dashboard = query({
   args: { code: v.string(), kid: v.string() },
   handler: async (ctx, a) => {
-    const expected = process.env.PARENT_CODE
-    if (!expected || a.code !== expected) return null
+    if (!(await isParent(a.code))) return null
     const snap = await ctx.db
       .query("snapshots")
       .withIndex("by_kid", (q) => q.eq("kid", a.kid))
