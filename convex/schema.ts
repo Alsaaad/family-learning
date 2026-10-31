@@ -24,4 +24,11 @@ export default defineSchema({
     progress: v.any(),
     updatedAt: v.number(),
   }).index("by_kid", ["kid"]),
+
+  // سجلات جواد: مفتاح/قيمة (sessions/…، probes/…، plan/…)
+  jawadRecords: defineTable({
+    path: v.string(),
+    data: v.any(),
+    updatedAt: v.number(),
+  }).index("by_path", ["path"]),
 })

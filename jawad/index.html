@@ -1,0 +1,985 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>سجل التقييم الأساسي</title>
+<style>
+body{margin:0}
+[hidden]{display:none!important}
+.bl .group.skipped,.bl .item.skipped{opacity:.5}
+.bl .group.skipped h3,.bl .item.skipped .stim{text-decoration:line-through}
+.bl .group.skipped .fields,.bl .item.skipped .fields{pointer-events:none}
+.bl .skipnote{padding:8px 16px;font-size:13px;font-weight:600;color:var(--no);background:var(--no-tint);border-bottom:1px solid var(--line)}
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap');
+
+/* Layout: one working column — sticky status bar, section chips, one section at a time; item rows built for thumbs on a tablet beside the child */
+.bl{
+  --bg:#f2f4f3; --surface:#ffffff; --sunk:#e9edeb; --ink:#16262a; --muted:#5b6b6e; --line:#d4dbd9;
+  --accent:#0f5b62; --accent-ink:#ffffff; --accent-tint:#dcebec;
+  --ok:#2c7a4c; --ok-tint:#ddf0e3; --no:#a2392b; --no-tint:#f6e0dc; --part:#8a5a00; --part-tint:#fbefd2;
+  --probe:#5b4a8a; --probe-tint:#ebe7f5;
+  --f-body:'IBM Plex Sans Arabic','Geeza Pro','Noto Sans Arabic',Tahoma,sans-serif;
+  --f-stim:'Amiri','Traditional Arabic','Geeza Pro',serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .bl{
+  --bg:#0f1719; --surface:#162124; --sunk:#1c292d; --ink:#e3ebea; --muted:#9aabad; --line:#2a3a3e;
+  --accent:#62b4bb; --accent-ink:#0b1416; --accent-tint:#1c393c;
+  --ok:#6cc391; --ok-tint:#173225; --no:#ef8a7a; --no-tint:#3a1f1b; --part:#e8b955; --part-tint:#3a2e12;
+  --probe:#aa9be0; --probe-tint:#262040; color-scheme:dark }}
+:root[data-theme="dark"] .bl{
+  --bg:#0f1719; --surface:#162124; --sunk:#1c292d; --ink:#e3ebea; --muted:#9aabad; --line:#2a3a3e;
+  --accent:#62b4bb; --accent-ink:#0b1416; --accent-tint:#1c393c;
+  --ok:#6cc391; --ok-tint:#173225; --no:#ef8a7a; --no-tint:#3a1f1b; --part:#e8b955; --part-tint:#3a2e12;
+  --probe:#aa9be0; --probe-tint:#262040; color-scheme:dark }
+.bl *{box-sizing:border-box}
+.bl{min-height:100vh;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.7;direction:rtl;margin:0}
+button,input,textarea{font:inherit;color:inherit}
+.wrap{max-width:900px;margin:0 auto;padding-inline:16px;padding-block:0 80px}
+h1,h2,h3{margin:0;line-height:1.4;text-wrap:balance}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:-16px;padding:10px 16px 8px}
+.bar-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bar h1{font-size:17px;font-weight:700;flex:1 1 auto;min-width:0}
+.pill{font-size:12.5px;padding:4px 11px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.pill.ok{background:var(--ok-tint);color:var(--ok)}
+.pill.busy{background:var(--accent-tint);color:var(--accent)}
+.pill.err{background:var(--no-tint);color:var(--no)}
+.sess-chip{font-size:12.5px;padding:4px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer}
+.sess-chip.none{border-color:var(--no);color:var(--no)}
+nav.tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:thin}
+nav.tabs button{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 11px;font-size:13px;cursor:pointer;display:flex;gap:6px;align-items:center}
+nav.tabs button .cnt{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+nav.tabs button[aria-current="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+nav.tabs button[aria-current="true"] .cnt{color:var(--accent-ink);opacity:.8}
+nav.tabs button.probe-tab{border-color:var(--probe)}
+.banner{margin:14px 0 0;padding:10px 14px;border-radius:10px;font-size:13.5px;background:var(--part-tint);color:var(--ink)}
+.banner b{color:var(--part)}
+main{padding-top:14px}
+.sec-head{margin:6px 0 14px}
+.sec-head h2{font-size:21px}
+.eyebrow{font-size:12px;letter-spacing:.02em;color:var(--accent);font-weight:600}
+.eyebrow.probe{color:var(--probe)}
+.lead{color:var(--muted);font-size:14px;margin:6px 0 0;max-width:65ch}
+.note{background:var(--accent-tint);border-radius:10px;padding:10px 14px;font-size:13.5px;margin:10px 0}
+.note b{color:var(--accent)}
+.note.warn{background:var(--no-tint)} .note.warn b{color:var(--no)}
+.note.gold{background:var(--part-tint)} .note.gold b{color:var(--part)}
+.note.probe{background:var(--probe-tint)} .note.probe b{color:var(--probe)}
+.group{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin:14px 0;overflow:hidden}
+.group > header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.group > header h3{font-size:15.5px;flex:1 1 auto}
+.group > header .gscore{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.group .how{padding:8px 16px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--line);background:var(--sunk)}
+.item{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:10px 14px;padding:12px 16px;border-bottom:1px solid var(--line);align-items:start}
+.item:last-child{border-bottom:0}
+@media (max-width:560px){.item{grid-template-columns:1fr}}
+.stimbox{min-width:0;display:flex;flex-direction:column;gap:2px}
+.stim{font-family:var(--f-stim);font-size:23px;line-height:1.5;color:var(--ink)}
+.stim.small{font-family:var(--f-body);font-size:14.5px;font-weight:600;line-height:1.6}
+.key{font-size:12px;color:var(--muted)}
+.showbtn{align-self:flex-start;margin-top:4px;font-size:12px;border:1px dashed var(--line);background:transparent;border-radius:8px;padding:2px 9px;cursor:pointer;color:var(--accent)}
+.fields{display:flex;flex-direction:column;gap:8px;min-width:0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;gap:4px;flex-wrap:wrap;align-items:center}
+.seg-l{font-size:12px;color:var(--muted);margin-inline-end:2px}
+.seg button{min-height:40px;min-width:52px;padding:4px 12px;border-radius:9px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:14px}
+.seg button[aria-pressed="true"]{font-weight:700}
+.seg button.v-ok[aria-pressed="true"]{background:var(--ok-tint);border-color:var(--ok);color:var(--ok)}
+.seg button.v-no[aria-pressed="true"]{background:var(--no-tint);border-color:var(--no);color:var(--no)}
+.seg button.v-part[aria-pressed="true"],.seg button.v-other[aria-pressed="true"]{background:var(--part-tint);border-color:var(--part);color:var(--part)}
+.seg button.v-na[aria-pressed="true"]{background:var(--sunk);border-color:var(--muted);color:var(--muted)}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
+input.tx,textarea.tx{width:100%;min-height:40px;border:1px solid var(--line);background:var(--bg);border-radius:9px;padding:7px 11px;font-size:14px}
+textarea.tx{min-height:76px;resize:vertical}
+input.tx:disabled{opacity:.45}
+label.num{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted)}
+label.num input{width:80px;min-height:40px;border:1px solid var(--line);background:var(--bg);border-radius:9px;padding:6px 10px;font-size:15px;text-align:center;font-variant-numeric:tabular-nums}
+.codes{display:flex;gap:5px;flex-wrap:wrap}
+.codes .cl{font-size:12px;color:var(--muted);width:100%}
+.codes button{font-size:12.5px;padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer;min-height:32px}
+.codes button[aria-pressed="true"]{background:var(--no-tint);border-color:var(--no);color:var(--no);font-weight:600}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.passage{font-family:var(--f-stim);font-size:20px;line-height:2.1;padding:14px 16px;border-bottom:1px solid var(--line)}
+.btn{min-height:42px;padding:6px 16px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer;font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.probe{background:var(--probe);border-color:var(--probe);color:var(--accent-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+/* sessions */
+.sess{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:12px 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px 14px}
+.sess.current{border:2px solid var(--accent)}
+.sess .full{grid-column:1/-1}
+.sess label.fl{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted)}
+.sess .head{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.sess .head b{font-size:15px;color:var(--ink)}
+/* probe */
+.probe-switch{display:flex;gap:6px;margin:8px 0 4px;flex-wrap:wrap}
+.probe-switch button{border:1px solid var(--probe);background:transparent;color:var(--probe);border-radius:10px;padding:6px 14px;cursor:pointer;font-weight:600}
+.probe-switch button[aria-pressed="true"]{background:var(--probe);color:var(--accent-ink)}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin:14px 0;overflow:hidden}
+.stage.primary{border:2px solid var(--part)}
+.stage > header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
+.stage > header h3{font-size:15.5px;flex:1 1 auto}
+.stage .tag{font-size:12px;padding:2px 10px;border-radius:999px;background:var(--part-tint);color:var(--part);font-weight:600}
+.stage .tag.grey{background:var(--sunk);color:var(--muted)}
+.trow{display:grid;grid-template-columns:minmax(90px,150px) 1fr;gap:8px 14px;padding:11px 16px;border-bottom:1px solid var(--line);align-items:start}
+.trow:last-child{border-bottom:0}
+@media (max-width:560px){.trow{grid-template-columns:1fr}}
+.tname{font-weight:700;font-size:15px;min-width:0;overflow-wrap:anywhere}
+.tname .n{color:var(--probe);font-variant-numeric:tabular-nums;margin-inline-end:4px}
+table.ref{width:100%;border-collapse:collapse;font-size:13px}
+table.ref th,table.ref td{border-bottom:1px solid var(--line);padding:7px 10px;text-align:right;vertical-align:top}
+table.ref th{color:var(--muted);font-weight:600;background:var(--sunk)}
+.tablewrap{overflow-x:auto}
+/* summary */
+.sumtable{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.sumtable th,.sumtable td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}
+.sumtable th{background:var(--sunk);color:var(--muted);font-weight:600}
+.sumtable td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.sumtable tr.sec td{background:var(--accent-tint);font-weight:700}
+pre.out{white-space:pre-wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;font-family:var(--f-body);font-size:13px;max-height:340px;overflow:auto}
+/* child view */
+#stage{position:fixed;inset:0;z-index:100;background:var(--surface);display:flex;align-items:center;justify-content:center;padding:24px;cursor:pointer}
+#stage .big{font-family:var(--f-stim);font-size:clamp(64px,16vw,150px);line-height:1.5;color:var(--ink);text-align:center}
+#stage .big.text{font-size:clamp(24px,4.6vw,38px);line-height:2.2;max-width:34ch;text-align:right}
+#stage .close{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);inset-inline-start:12px;font-size:13px;background:var(--sunk);border:0;border-radius:999px;padding:6px 14px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){ .seg button,.codes button{transition:background .12s,border-color .12s} }
+
+.bl .guide-btn{margin-inline-start:auto;font-size:13px;border:1px solid var(--accent);color:var(--accent);background:var(--surface);border-radius:999px;padding:5px 14px;cursor:pointer;font-weight:600}
+.bl .guide-btn[aria-expanded="true"]{background:var(--accent);color:var(--accent-ink)}
+.bl .guide{background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:14px 18px;margin:10px 0 16px;font-size:14px;line-height:1.85}
+.bl .guide p{margin:6px 0}
+.bl .guide ol,.bl .guide ul{margin:4px 0;padding-inline-start:22px}
+.bl dl.gd{display:grid;grid-template-columns:150px 1fr;gap:8px 16px;margin:0}
+.bl dl.gd dt{font-weight:700;color:var(--accent)}
+.bl dl.gd dd{margin:0}
+.bl dl.gd dd.say{background:var(--accent-tint);border-radius:8px;padding:6px 10px}
+.bl dl.gd dd.ex{background:var(--part-tint);border-radius:8px;padding:6px 10px}
+@media (max-width:560px){.bl dl.gd{grid-template-columns:1fr}.bl dl.gd dt{margin-top:6px}}
+.bl table.gt{width:100%;border-collapse:collapse;margin:8px 0}
+.bl table.gt th,.bl table.gt td{border:1px solid var(--line);padding:6px 10px;text-align:right}
+.bl table.gt th{background:var(--sunk)}
+.bl .sec-title-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+</style>
+</head>
+<body>
+<div id="app" class="bl" dir="rtl" lang="ar"></div>
+<script src="https://cdn.jsdelivr.net/npm/convex@1.42.2/dist/browser.bundle.js"></script>
+<script>
+const block = (g) => `
+<dl class="gd">
+  <dt>الهدف</dt><dd>${g.goal}</dd>
+  <dt>تحتاج قبل البدء</dt><dd>${g.prep}</dd>
+  <dt>تقول له حرفيًا</dt><dd class="say">${g.say}</dd>
+  <dt>كيف تعرض السؤال</dt><dd>${g.present}</dd>
+  <dt>لا تفعل</dt><dd><ul>${g.dont.map((d) => `<li>${d}</li>`).join('')}</ul></dd>
+  <dt>كيف تسجّل</dt><dd>${g.record}</dd>
+  <dt>متى توقف</dt><dd>${g.stop}</dd>
+  <dt>مثال</dt><dd class="ex">${g.example}</dd>
+  <dt>أخطاء يقع فيها الأهل كثيرًا</dt><dd><ul>${g.mistakes.map((d) => `<li>${d}</li>`).join('')}</ul></dd>
+</dl>`
+
+const COMMON_DONT = ['لا تعلّمه الجواب ولا تلمّح له', 'لا تقل «ركّز» أو «أنت تعرفها»', 'لا تُظهر خيبة أمل، وامدح المحاولة لا الجواب الصحيح فقط']
+
+const GUIDE = {
+  sessions: `
+<p><b>الفرق الأهم:</b> الأقسام أ–ح «قياس»: نرى ما يعرفه الآن بدون أي تعليم. القسم ط فقط فيه «تعليم» متعمد. إذا علّمته أثناء القياس، تصير النتيجة أعلى من الواقع ولا نعرف مستواه الحقيقي.</p>
+<table class="gt"><tr><th>أثناء القياس (أ–ح)</th><th>أثناء التعليم (ط فقط)</th></tr>
+<tr><td>لا أعلّم الجواب</td><td>أشرح الجواب</td></tr>
+<tr><td>لا أصحّح مباشرة</td><td>أصحّح وأدرّب</td></tr>
+<tr><td>أقيس ما يعرفه الآن</td><td>أحاول أن يتعلم</td></tr>
+<tr><td>لا تلميح إلا إذا سمحت المهمة</td><td>مساعدة متدرجة</td></tr></table>
+<p><b>كل مرة:</b> اضغطي «ابدأ جلسة جديدة» قبل أول سؤال، وفي آخر الجلسة عبّئي النوم والمزاج والملاحظات. الجلسة ١٥–٢٥ دقيقة، وأوقفيها عند التعب أو الإحباط.</p>
+<p><b>جملة البداية:</b> «الحين بنسوي كم نشاط بسيط، مو اختبار مدرسة، وما فيه نجاح ورسوب. إذا ما عرفت عادي، قل ما أدري».</p>`,
+
+  A: block({
+    goal: 'هل يسمع أصوات الكلام ويقسّمها ويدمجها؟ هذا مختلف عن معرفة الحروف المكتوبة.',
+    prep: 'مكان هادئ بلا تلفزيون أو جوال. لا تحتاج ورقًا، القسم كله شفهي.',
+    say: '«بنلعب لعبة بالكلام. أنا أقول كلمة وأنت تقول لي شي عنها. إذا ما عرفت عادي».',
+    present: 'تقولين الكلمة بصوتك ولا تعرضين شيئًا مكتوبًا. بالفصحى الواضحة. تعيدين الكلمة مرتين كحد أقصى إن طلب. قبل كل مهمة مثال تدريبي واحد لا يُحسب، وتشرحين فيه المطلوب حتى يفهم.',
+    dont: COMMON_DONT.concat(['في الدمج: لا تنطقي الحرف بفتحة. قولي «ك… وووو… ب» لا «كا… وو… با»']),
+    record: 'اكتبي ما قاله بالضبط، لا «غلط». مثال: «قال ش بدل س»، أو «قال صوت الحرف بفتحة: مَ».',
+    stop: 'بعد ٣ أخطاء متتالية في نفس المهمة انتقلي للتي بعدها. التجزئة والحذف فقط إذا نجح في الدمج.',
+    example: 'تقولين: «سيارة… أي صوت تسمعه أول الكلمة؟». يقول: «ش». تضغطين ✗ وتكتبين: ش.',
+    mistakes: ['تكرار الكلمة أكثر من مرتين لأنك تبينه يجاوب صح', 'تغيير الكلمة إذا بدت صعبة بدون تسجيل ذلك', 'تعبير الوجه يكشف إن كان جوابه صحيحًا'],
+  }),
+
+  B: block({
+    goal: 'كم حرفًا يعرف اسمه، وكم حرفًا يعرف صوته. الاثنان منفصلان.',
+    prep: 'الجوال أو الآيباد. زر «اعرض للطفل» يكبّر الحرف على الشاشة بدون الإجابة.',
+    say: '«بشوف معك الحروف وحدة وحدة».',
+    present: 'اعرضي الحرف وحده. اسألي: «وش اسم هذا الحرف؟» وسجّلي. ثم: «طيب وش صوته؟» وسجّلي. لا تسألي السؤالين معًا.',
+    dont: COMMON_DONT.concat(['لا تعرضي الحرف داخل كلمة في المهمة الأولى']),
+    record: 'الاسم ✓ أو ✗، والصوت ✓ أو ✗، كلٌّ وحده. إذا قال صوت الحرف بفتحة («با») فالصوت صحيح، واكتبي ما قاله.',
+    stop: 'إذا تعب في منتصف الحروف، توقفي وأكملي في جلسة أخرى.',
+    example: 'حرف «ذ»: للاسم قال «ذا» ← الاسم ✗ واكتبي «ذا». للصوت قال «ذا» ← الصوت ✓.',
+    mistakes: ['ترك الحرف أمامه وقتًا طويلًا جدًا كأنك تنتظرين أن يتذكر', 'نسيان سؤال الصوت بعد الاسم'],
+  }),
+
+  C: block({
+    goal: 'أين بالضبط يستطيع القراءة وأين يتوقف، من أبسط مقطع إلى الكلمات الطويلة، ثم كلمات غير حقيقية لنرى هل يقرأ بالحروف فعلًا أم يحفظ الشكل.',
+    prep: 'الجوال أو الآيباد مع زر «اعرض للطفل».',
+    say: '«هذي كلمات، بعضها سهلة وبعضها أصعب، وبعضها مو حقيقية أصلًا. اقرأها بصوت عالي على راحتك».',
+    present: 'اعرضي الكلمة واطلبي القراءة. انتظري ٥–٧ ثوانٍ قبل تسجيل «لم يستجب». لا تقرئي الكلمة له أبدًا.',
+    dont: COMMON_DONT.concat(['لا تكملي الكلمة إذا توقف في نصفها', 'لا تقولي «قريبة، حاول مرة ثانية» — هذا تصحيح']),
+    record: 'اكتبي ما قرأه حرفيًا، واختاري نوع الخطأ. مثال: «قرأ قلب بدل قلم» + إبدال. وفي المرحلة ١ انتبهي: هل يقرأ «سُ» و«مِ» بحركتها، أم يقرأ كل شيء بفتحة؟',
+    stop: 'إذا أخطأ في كل كلمات مرحلة، لا تنتقلي للمرحلة التالية. انتقلي للقسم د أو أوقفي الجلسة.',
+    example: '«مَدْرَسَة»: قرأ «م… د… ر… س… ة» ببطء ثم «مدرسة». ✓ واختاري «بطيء».',
+    mistakes: ['الإشارة بالإصبع تحت الحرف الذي يتعثر فيه', 'إعطاؤه وقتًا طويلًا ليتذكر', 'المدح فقط عند الجواب الصحيح'],
+  }),
+
+  D: block({
+    goal: 'قراءة كلمات حقيقية تناسب عمره، ومقارنة أثر التشكيل وأثر شيوع الكلمة.',
+    prep: 'نفس القسم ج.',
+    say: '«هذي كلمات عن الكورة والسيارات».',
+    present: 'مثل القسم ج تمامًا.',
+    dont: COMMON_DONT.concat(['لا تقولي إن قائمة ما «أصعب»']),
+    record: '✓ أو ✗ + ما قاله + نوع الخطأ.',
+    stop: 'إذا أخطأ في قائمة كاملة، سجّلي وانتقلي للتي بعدها.',
+    example: '«مِقْوَد»: قال «مقعد». ✗ واكتبي «مقعد» + إبدال.',
+    mistakes: ['مقارنة القوائم بصوت عالٍ أمامه'],
+  }),
+
+  E: block({
+    goal: 'هل يحوّل الصوت المسموع إلى حرف مكتوب؟ عكس القراءة.',
+    prep: 'ورقة بيضاء وقلم رصاص.',
+    say: '«أنا بقول صوت أو كلمة، وأنت اكتبها».',
+    present: 'انطقي مرة واحدة بوضوح، وإعادة واحدة فقط إن طلب. لا تهجّي الكلمة ولا تبطّئيها لتفصلي أصواتها.',
+    dont: COMMON_DONT.concat(['لا تعلّقي على خطه، فقط على ما كتب']),
+    record: 'اكتبي في الخانة ما كتبه هو حرفيًا. صوّري الورقة إن أمكن.',
+    stop: 'بعد ٣ أخطاء متتالية.',
+    example: 'أمليتِ «قَلَم»، كتب «قلن». ✗ واكتبي «قلن» + إبدال.',
+    mistakes: ['إعادة الكلمة أكثر من مرة', 'نطق الكلمة ببطء يفصل حروفها'],
+  }),
+
+  F: block({
+    goal: 'قراءة جمل متصلة وفهمها، فقط إذا كانت قراءته الأساسية تسمح.',
+    prep: 'زر «اعرض الفقرة للطفل».',
+    say: '«هذي قصة قصيرة، اقرأها وبعدين بسألك عنها».',
+    present: 'يقرأ الفقرة كلها بصوت عالٍ، ثم تسألين أسئلة الفهم بعد انتهائه.',
+    dont: COMMON_DONT.concat(['لا تطبّقي القسم إذا الشرط في أعلى الصفحة لم يتحقق', 'لا تقرئي الفقرة له كمثال', 'لا تشرحي معنى كلمة قبل أن يقرأ']),
+    record: 'عدد الكلمات الصحيحة، الجهد، هل صحّح نفسه، والكلمات التي أخطأ فيها، ثم أسئلة الفهم.',
+    stop: 'إذا الشرط لم يتحقق، لا تطبّقي القسم إطلاقًا.',
+    example: 'قرأ ١٨ من ٢٠ بجهد متوسط وصحّح نفسه مرتين، وأجاب ٤ من ٤.',
+    mistakes: ['قراءة الفقرة له قبل أن يحاول'],
+  }),
+
+  G: block({
+    goal: 'ملاحظة عامة لفهمه وتعبيره في كلام طبيعي. ليس تشخيصًا.',
+    prep: 'لا شيء. يكفي أن تكونوا جالسين بشكل عادي.',
+    say: 'لا تقولي إنه اختبار. سولفي معه بلهجتكم العادية.',
+    present: 'بالعامية. اسألي ضمن السياق، لا كقائمة أسئلة متتالية.',
+    dont: ['لا تكملي جملته إذا توقف يدوّر على كلمة. انتظري ثانيتين أو ثلاثًا وسجّلي ما فعل', 'لا تحوّليها لاستجواب'],
+    record: 'وصف حر: «توقف ٣ ثوانٍ ثم قال (الشخص اللي يدربنا) بدل المدرب».',
+    stop: 'إذا لم يكن مرتاحًا، أجّلي.',
+    example: '«ليش تحب الكورة؟» قال: «لأنه… يعني… حلوة». ← الشرح: جزئيًا، واكتبي ما قاله.',
+    mistakes: ['إكمال الجمل عنه لأنك تعرفين ما يريد قوله'],
+  }),
+
+  H: block({
+    goal: 'مستواه في الأرقام والعمليات، والتفريق بين صعوبة الرياضيات وصعوبة فهم صياغة المسألة.',
+    prep: 'ورقة وقلم، وأشياء للعد إن أردت (حلاوة، أقلام).',
+    say: '«بنسوي شوي حساب بسيط، عادي تستخدم أصابعك».',
+    present: 'اقرئي المسألة له وأعطيه وقتًا بلا ضغط.',
+    dont: COMMON_DONT.concat(['لا تقولي «لا تستخدم أصابعك» — الأصابع طريقة وليست ضعفًا']),
+    record: 'الإجابة، والطريقة (أصابع/عدّ/ذهني/كتابة/تخمين)، والسرعة. في المسائل الكلامية سجّلي الثلاثة منفصلة.',
+    stop: 'بعد ٣ أخطاء متتالية من نفس النوع.',
+    example: '«٨ − ٣»: عدّ بأصابعه ببطء وقال ٥. ✓ أصابع، بطيء.',
+    mistakes: ['تبسيط صياغة المسألة بدون تسجيل ذلك'],
+  }),
+
+  I: `
+<p><b>هذا هو القسم الأهم لعائلتنا:</b> «يتعلم شي اليوم، وش يبقى منه بكرة؟»</p>
+<p><b>اليوم الأول</b></p>
+<ol>
+<li>اختاري ٤–٦ أهداف من نوع واحد فقط (أصوات حروف أخطأ فيها، أو نمط قراءة واحد). اسأليه عنها أولًا بلا مساعدة؛ إذا عرف أحدها استبدليه.</li>
+<li>علّمي كل هدف بنفس الطريقة: أنا أسوي («هذا صوته ذ») ← نسوي مع بعض («قل معي ذ») ← تسوي أنت.</li>
+<li>سجّلي عدد محاولات التعليم، ومتى أجاب صح لوحده أول مرة.</li>
+<li>«معيار الجلسة»: ٣ إجابات صحيحة لوحده، بينها أسئلة أخرى. هذا لا يعني أنه سيتذكره غدًا.</li>
+<li>في آخر الجلسة اسأليه عن كل هدف مرة واحدة بلا مساعدة، واضغطي «سجّل وقت انتهاء التعليم».</li>
+<li><b>بعد الجلسة:</b> لا تراجعي معه الأهداف ولا تذكّريه بها أبدًا حتى الغد.</li>
+</ol>
+<p><b>اليوم الثاني — بعد ٢٤ ساعة تقريبًا</b></p>
+<ol>
+<li>اسأليه عن <b>كل</b> الأهداف واحدًا واحدًا، بلا أي مساعدة.</li>
+<li>لا تقولي «صح» أو «خطأ» ولا تعلّقي بوجهك حتى تنتهي من كل الأهداف.</li>
+<li>اكتبي ما قاله بالضبط لكل هدف.</li>
+<li>بعد تسجيل الكل فقط، يُفتح سُلّم التلميح. ابدئي بالتلميح البسيط، وسجّلي أقل مستوى نجح.</li>
+<li>إعادة التعليم مسموحة بعد انتهاء التلميح فقط.</li>
+</ol>
+<p><b>أنماط مهم أن تكتبيها إذا لاحظتِها (بدون تشخيص):</b> يتعلم بسرعة لكن ينسى غدًا · يحتاج محاولات كثيرة لكن يثبت ما يتعلمه · لا يتذكر لوحده لكن يختار الصح من خيارات · يتذكر ما تدرّب عليه لكن لا يطبّقه على كلمة جديدة · أداؤه يتذبذب كثيرًا بين الجلسات.</p>`,
+
+  sum: '<p>هذه الصفحة للقراءة فقط. الأرقام وصفية: «X صحيح من Y».</p>',
+}
+
+
+const MARKUP = "<div class=\"wrap\">\n  <div class=\"bar\">\n    <div class=\"bar-top\">\n      <h1>سجل التقييم الأساسي</h1>\n      <a href=\"plan.html\" style=\"font-size:13px;color:var(--accent)\">خطة المرحلة الثانية ←</a>\n      <button type=\"button\" class=\"sess-chip none\" id=\"sessChip\">لا توجد جلسة حالية</button>\n      <span class=\"pill\" id=\"saveState\">جارٍ الاتصال…</span>\n    </div>\n    <nav class=\"tabs\" id=\"tabs\" aria-label=\"أقسام التقييم\"></nav>\n  </div>\n  <div id=\"dbBanner\" class=\"banner\" hidden></div>\n  <main id=\"main\"></main>\n</div>\n<div id=\"stage\" hidden role=\"dialog\" aria-label=\"عرض للطفل\"><button type=\"button\" class=\"close\">إغلاق ✕</button><div class=\"big\" id=\"stageText\"></div></div>"
+
+function start(root, client, api){
+if(root.dataset.started) return; root.dataset.started = '1';
+root.innerHTML = MARKUP;
+
+const $ = s => document.querySelector(s);
+const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ============ OPTION SETS ============ */
+const OK3 = [{v:'ok',l:'✓ صح'},{v:'no',l:'✗ خطأ'},{v:'na',l:'لم يُطبَّق'}];
+const OK2 = [{v:'ok',l:'✓'},{v:'no',l:'✗'}];
+const YN  = [{v:'ok',l:'نعم'},{v:'no',l:'لا'}];
+const YNP = [{v:'ok',l:'نعم'},{v:'part',l:'جزئيًا'},{v:'no',l:'لا'}];
+const DID = [{v:'ok',l:'أدّاها'},{v:'part',l:'جزئيًا'},{v:'no',l:'لم يؤدها'}];
+const DIST= [{v:'ok',l:'ميّز'},{v:'no',l:'خلط'},{v:'na',l:'لم يُطبَّق'}];
+const READ_CODES = ['حذف','إبدال','تشابه','حركة','تخمين','جزئي','بطيء','عكس','تصحيح','لم يستجب'];
+const MATH_CODES = ['عدّ','حساب','عملية','لغة','منزلة','استرجاع'];
+
+const F_MARK = {k:'mark', t:'seg', o:OK3};
+const F_SAID = {k:'said', t:'text', ph:'ما قاله أو فعله بالضبط'};
+const F_RC   = {k:'codes', t:'codes', set:READ_CODES};
+const F_MC   = {k:'codes', t:'codes', set:MATH_CODES};
+
+const mk = (gid, rows) => rows.map((r, i) => ({ id: gid + '-' + (i + 1), stim: r[0], key: r[1] || '', show: r[2] }));
+
+/* ============ CONTENT (matches printed v2.2) ============ */
+const SECTIONS = [
+{ id:'A', tab:'أ. الوعي الصوتي', title:'الوعي الصوتي', eyebrow:'القسم أ — شفهي بالكامل',
+  lead:'تقول الكلمة بصوتك ولا تعرض شيئًا مكتوبًا. فصحى واضحة وثابتة طوال المهمة.',
+  fid:'<b>قبل كل مهمة:</b> مثال تدريبي واحد لا يُحسب. تعيد الكلمة مرتين كحد أقصى إن طلب. لا تعطِ الإجابة ولا تلمّح. توقّف بعد ٣ أخطاء متتالية وانتقل للمهمة التالية.',
+  groups:[
+  { id:'A1', title:'١. تحديد المقطع الصوتي', how:'«كم مقطع في هذه الكلمة؟ صفّق مع كل مقطع». المثال التدريبي: «مدرسة» = ٣.', fields:[F_MARK,F_SAID],
+    items: mk('A1', [['سيارة','٣ مقاطع'],['كرة','٢'],['تلفزيون','٤'],['أسد','٢'],['جوّال','٢']]) },
+  { id:'A2', title:'٢. تحديد الصوت الأول', how:'«أي صوت تسمعه أول الكلمة؟»', fields:[F_MARK,F_SAID],
+    items: mk('A2', [['سيارة','/س/'],['فريق','/ف/'],['نمر','/ن/'],['قمر','/ق/'],['جبل','/ج/']]) },
+  { id:'A3', title:'٣. تحديد الصوت الأخير', how:'الكلمة تُنطق بالوقف (بلا حركة في آخرها).', fields:[F_MARK,F_SAID],
+    items: mk('A3', [['قلم','/م/'],['باب','/ب/'],['درس','/س/']]) },
+  { id:'A4', title:'٤. الدمج الصوتي', how:'انطق الأصوات منفصلة ببطء، وحرف المد صوت ممدود: «ك… وووو… ب» لا «ك… واو… ب».', fields:[F_MARK,F_SAID],
+    items: mk('A4', [['ك + وو + ب','كوب'],['ن + اا + ر','نار'],['ب + اا + ب','باب'],['ف + يي + ل','فيل']]) },
+  { id:'A5', title:'٥. التجزئة الصوتية', how:'«قل لي أصوات هذه الكلمة واحدًا واحدًا». كلمات المد الطويل فقط (٣ أصوات فعلية).', fields:[F_MARK,F_SAID],
+    items: mk('A5', [['دار','د / اا / ر'],['نور','ن / وو / ر'],['ريش','ر / يي / ش']]) },
+  { id:'A6', title:'٦. حذف الصوت الأخير', how:'«قل (دار) بدون آخر صوت فيها». فقط إن نجح فيما سبق.', fields:[F_MARK,F_SAID],
+    items: mk('A6', [['دار بدون /ر/','دا'],['نور بدون /ر/','نو'],['تين بدون /ن/','تي']]) }
+  ]},
+{ id:'B', tab:'ب. الحروف', title:'معرفة الحروف', eyebrow:'القسم ب',
+  lead:'اسم الحرف وصوته يُسجَّلان منفصلين. معرفة الاسم لا تعني معرفة الصوت.',
+  fid:'<b>الطريقة:</b> اعرض الحرف وحده (زر «اعرض للطفل» يكبّره على الشاشة). اسأل: «وش اسمه؟» ثم بعد التسجيل: «وش صوته؟» بلا حركة. لا تصحّح.',
+  groups:[
+  { id:'B1', title:'١. اسم الحرف وصوته', how:'سجّل الاسم والصوت كلٌّ على حدة. إن قال حرفًا آخر اكتبه في الخانة.', show:true,
+    fields:[{k:'name',t:'seg',o:OK2,label:'الاسم'},{k:'sound',t:'seg',o:OK2,label:'الصوت'},{k:'said',t:'text',ph:'ما قاله إن أخطأ'}],
+    items: mk('B1', 'ا ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن هـ و ي'.split(' ').map(x => [x, ''])) },
+  { id:'B2', title:'٢. التعرّف على الحرف حسب موضعه', how:'اعرض الكلمة، واطلب منه أن يشير إلى الحرف المطلوب.', show:true, fields:[F_MARK,F_SAID],
+    items: mk('B2', [['مدرسة','أشر إلى: م (بداية)'],['مدرسة','أشر إلى: ر (وسط)'],['مدرسة','أشر إلى: ة (نهاية)'],['كتاب','أشر إلى: ت (وسط)'],['سيارة','أشر إلى: س (بداية)']]) },
+  { id:'B3', title:'٣. الحروف المتشابهة بصريًا', how:'اعرض المجموعة واسأله عن الفرق، أو عن اسم كل حرف فيها.', show:true,
+    fields:[{k:'mark',t:'seg',o:DIST},F_SAID,F_RC],
+    items: mk('B3', [['ب ت ث'],['ج ح خ'],['د ذ'],['س ش'],['ف ق']]) },
+  { id:'B4', title:'٤. فحص نطق السين (جديد)', how:'«قل ورايا: سيف». يردّد الكلمة. اكتبي: هل خرجت السين سينًا، أم صارت شينًا؟ لا تصحّحي له.', fields:[{k:'mark',t:'seg',o:[{v:'ok',l:'نطقها صح'},{v:'no',l:'صارت ش / غير واضحة'},{v:'na',l:'لم يُطبَّق'}]},F_SAID],
+    items: mk('B4', [['سيف','السين في البداية'],['شمس','فيها شين وسين'],['سمك','السين في البداية'],['شجرة','الشين في البداية']]) },
+  { id:'B5', title:'٥. سماع الحركات (جديد — شفهي)', how:'بصوتك فقط، بدون كتابة. انطقي المقطعين بوضوح واسأليه: «نفس الصوت ولا مختلف؟». ثم في آخر ثلاثة: «قل ورايا» ويردّد.', fields:[F_MARK,F_SAID],
+    items: mk('B5', [['بَ … بُ','مختلف'],['بُ … بِ','مختلف'],['مَ … مَ','نفس الصوت'],['سِ … سَ','مختلف'],['ردّد: بُ','بُ'],['ردّد: مِ','مِ'],['ردّد: لُ','لُ']]) }
+  ]},
+{ id:'C', tab:'ج. فك الرموز', title:'فك الرموز', eyebrow:'القسم ج — ٨ مراحل',
+  lead:'من أبسط مقطع إلى الكلمات الأطول. إن فشل بوضوح في مرحلة فلا تنتقل للتي بعدها.',
+  fid:'<b>الطريقة:</b> اعرض الكلمة واطلب قراءتها بصوت عالٍ. انتظر ٥–٧ ثوانٍ قبل «لم يستجب». لا تقرأها له ولا تكمل عنه. عند الخطأ اكتب ما قاله بالضبط واختر نوع الخطأ.',
+  groups:[
+  { id:'C1', title:'المرحلة ١ — حرف + حركة قصيرة', show:true, fields:[F_MARK,F_SAID,F_RC], items: mk('C1', [['بَ'],['سُ'],['مِ'],['تَ'],['لُ']]) },
+  { id:'C2', title:'المرحلة ٢ — مقاطع مفتوحة بحركات قصيرة فقط', show:true, fields:[F_MARK,F_SAID,F_RC], items: mk('C2', [['كَتَبَ'],['لَعِبَ'],['رَسَمَ'],['فَهِمَ']]) },
+  { id:'C3', skip:'لا تطبّقيه الآن — المراحل التالية تعتمد على الحركات والدمج، وهو ما زال يتعثّر فيهما، فستُحبطه بلا معلومة جديدة.', title:'المرحلة ٣ — مقطع مغلق بساكن في آخر الكلمة', show:true, fields:[F_MARK,F_SAID,F_RC], items: mk('C3', [['قَلَم'],['كَتِف'],['وَلَد']]) },
+  { id:'C4', skip:'لا تطبّقيه الآن — المراحل التالية تعتمد على الحركات والدمج، وهو ما زال يتعثّر فيهما، فستُحبطه بلا معلومة جديدة.', title:'المرحلة ٤ — حروف المد الطويلة', show:true, fields:[F_MARK,F_SAID,F_RC], items: mk('C4', [['دَار'],['نُور'],['تِين'],['كَبِير']]) },
+  { id:'C5', skip:'لا تطبّقيه الآن — المراحل التالية تعتمد على الحركات والدمج، وهو ما زال يتعثّر فيهما، فستُحبطه بلا معلومة جديدة.', title:'المرحلة ٥ — السكون في وسط الكلمة', show:true, fields:[F_MARK,F_SAID,F_RC], items: mk('C5', [['مَدْرَسَة'],['جَدْوَل'],['يَكْتُب']]) },
+  { id:'C6', skip:'لا تطبّقيه الآن — المراحل التالية تعتمد على الحركات والدمج، وهو ما زال يتعثّر فيهما، فستُحبطه بلا معلومة جديدة.', title:'المرحلة ٦ — الشدّة', show:true, fields:[F_MARK,F_SAID,F_RC], items: mk('C6', [['مُعَلِّم'],['سَيَّارَة'],['حَمَّام']]) },
+  { id:'C7', skip:'لا تطبّقيه الآن — المراحل التالية تعتمد على الحركات والدمج، وهو ما زال يتعثّر فيهما، فستُحبطه بلا معلومة جديدة.', title:'المرحلة ٧ — كلمات متعددة المقاطع', show:true, fields:[F_MARK,F_SAID,F_RC], items: mk('C7', [['مُغَامَرَة'],['مُبَارَاة'],['اِسْتِكْشَاف']]) },
+  { id:'C8', skip:'لا تطبّقيه الآن — المراحل التالية تعتمد على الحركات والدمج، وهو ما زال يتعثّر فيهما، فستُحبطه بلا معلومة جديدة.', title:'المرحلة ٨ — عناصر غير مألوفة (المستوى ١)', how:'قل: «هذي كلمة مو حقيقية، بس أبي تحاول تقرأها بالحروف». اكتب قراءته الصوتية كما نطقها. إن بدا أنه يعرفها ككلمة، اكتب ذلك.', show:true, fields:[F_MARK,F_SAID,F_RC],
+    items: mk('C8', [['فَتَمَك'],['سَنَتَب'],['دَكَرَش']]) },
+  { id:'C9', skip:'لا تطبّقيه الآن — المراحل التالية تعتمد على الحركات والدمج، وهو ما زال يتعثّر فيهما، فستُحبطه بلا معلومة جديدة.', title:'المرحلة ٨ — عناصر غير مألوفة (المستوى ٢)', how:'مدّ وسكون وشدّة. نفس التعليمات.', show:true, fields:[F_MARK,F_SAID,F_RC],
+    items: mk('C9', [['دُرَاف'],['جَفْرُوت'],['دَقَّاش']]) }
+  ]},
+{ id:'D', tab:'د. قراءة الكلمات', title:'قراءة الكلمات', eyebrow:'القسم د',
+  lead:'ثلاث قوائم بكلمات مختلفة: أثر التشكيل يُقارن بين (أ) و(ب)، وأثر الشيوع في (ج). المقارنة وصفية تقريبية.',
+  fid:'<b>الطريقة:</b> نفس طريقة القسم ج. لا تقل له إن قائمة ما «أصعب».',
+  groups:[
+  { id:'D1', title:'قائمة أ — شائعة، مشكّلة بالكامل', show:true, fields:[F_MARK,F_SAID,F_RC], items: mk('D1', [['كُرَة'],['لَاعِب'],['مُدَرِّب'],['مَلْعَب']]).map((x,i) => i > 1 ? Object.assign(x,{skip:true}) : x) },
+  { id:'D2', skip:'لا تطبّقيها الآن — يكفي أول كلمتين من القائمة أ.', title:'قائمة ب — كلمات أخرى، تشكيل مخفّض', show:true, fields:[F_MARK,F_SAID,F_RC], items: mk('D2', [['شاحنة'],['محرك'],['هاتف'],['طريق']]) },
+  { id:'D3', skip:'لا تطبّقيها الآن — يكفي أول كلمتين من القائمة أ.', title:'قائمة ج — أقل شيوعًا، مشكّلة بالكامل', show:true, fields:[F_MARK,F_SAID,F_RC], items: mk('D3', [['مِقْوَد'],['إِطَار'],['مُنْتَخَب']]) }
+  ]},
+{ id:'E', tab:'هـ. الإملاء', title:'الإملاء', eyebrow:'القسم هـ',
+  lead:'تملي عليه ويكتب على ورقة. لا تعرض الكلمة.',
+  fid:'<b>الطريقة:</b> انطق مرة واحدة بوضوح، وإعادة واحدة فقط إن طلب. لا تهجِّ الكلمة ولا تبطّئها لتفصل أصواتها. اكتب في الخانة ما كتبه هو حرفيًا.',
+  groups:[
+  { id:'E1', title:'١. حروف مفردة', fields:[F_MARK,{k:'said',t:'text',ph:'ما كتبه'},F_RC], items: mk('E1', [['/ب/'],['/س/'],['/م/'],['/ت/']]) },
+  { id:'E2', title:'٢. مقاطع بسيطة', fields:[F_MARK,{k:'said',t:'text',ph:'ما كتبه'},F_RC], items: mk('E2', [['بَا'],['سُو']]) },
+  { id:'E3', title:'٣. كلمات مألوفة', fields:[F_MARK,{k:'said',t:'text',ph:'ما كتبه'},F_RC], items: mk('E3', [['كُرَة'],['بَاب'],['قَلَم']]) }
+  ]},
+{ id:'F', tab:'و. النص المتصل', title:'النص المتصل', eyebrow:'القسم و — بشرط',
+  lead:'قاعدة عملية لهذه الأداة فقط، لا معيار تشخيصي: الفقرة ١ إن حقق نحو ٧٠٪ في مراحل فك الرموز ١–٤، والفقرة ٢ إن قرأ الفقرة ١ بدقة نحو ٩٠٪.',
+  fid:'<b>الطريقة:</b> يقرأ الفقرة كاملة بصوت عالٍ، ثم تسأل أسئلة الفهم بعد انتهائه. لا تقرأها له قبله ولا تشرح كلمة.',
+  gate:true,
+  groups:[
+  { id:'F1', skip:'لا تطبّقيه الآن — شرط القراءة الأساسية لم يتحقق.', title:'الفقرة ١ — كرة القدم (٢٠ كلمة)', show:true,
+    passage:'سَامِي وَلَدٌ يُحِبُّ كُرَةَ القَدَمِ. يَلْعَبُ مَعَ أَصْحَابِهِ كُلَّ يَوْمِ خَمِيسٍ. يَرْكُضُ سَامِي بِسُرْعَةٍ فِي المَلْعَبِ. سَجَّلَ هَدَفًا وَفَرِحَ كَثِيرًا.',
+    items:[
+      {id:'F1-acc', stim:'الكلمات المقروءة صحيحة', small:true, fields:[{k:'n',t:'num',max:20,suffix:'من ٢٠'}]},
+      {id:'F1-eff', stim:'الجهد', small:true, fields:[{k:'v',t:'seg',o:[{v:'ok',l:'سهل'},{v:'part',l:'متوسط'},{v:'no',l:'متعب جدًا'}]}]},
+      {id:'F1-sc',  stim:'صحّح أخطاءه بنفسه؟', small:true, fields:[{k:'v',t:'seg',o:YNP}]},
+      {id:'F1-err', stim:'الكلمات التي أخطأ فيها', small:true, fields:[{k:'said',t:'text',ph:'مثال: قرأ (يلعب) = يلعبون'}]}
+    ]},
+  { id:'F1q', skip:'لا تطبّقيه الآن — شرط القراءة الأساسية لم يتحقق.', title:'أسئلة الفهم — الفقرة ١', fields:[F_MARK,F_SAID],
+    items: mk('F1q', [['ماذا يحب سامي؟','كرة القدم'],['مع من يلعب سامي؟','مع أصحابه'],['في أي يوم يلعب؟','يوم الخميس'],['ماذا فعل بعد أن ركض؟','سجّل هدفًا']]).map(x => Object.assign(x,{small:true})) },
+  { id:'F2', skip:'لا تطبّقيه الآن — شرط القراءة الأساسية لم يتحقق.', title:'الفقرة ٢ — رحلة الصحراء (٣٠ كلمة)', show:true,
+    passage:'سَافَرَ خَالِدٌ مَعَ أُسْرَتِهِ إِلَى الصَّحْرَاءِ فِي عُطْلَةِ نِهَايَةِ الأُسْبُوعِ. رَكِبُوا سَيَّارَةً كَبِيرَةً وَحَمَلُوا خَيْمَةً وَطَعَامًا. عِنْدَ الغُرُوبِ، أَشْعَلُوا نَارًا وَجَلَسُوا حَوْلَهَا يَتَحَدَّثُونَ. اسْتَمْتَعَ خَالِدٌ كَثِيرًا بِرُؤْيَةِ النُّجُومِ فِي السَّمَاءِ.',
+    items:[
+      {id:'F2-acc', stim:'الكلمات المقروءة صحيحة', small:true, fields:[{k:'n',t:'num',max:30,suffix:'من ٣٠'}]},
+      {id:'F2-eff', stim:'الجهد', small:true, fields:[{k:'v',t:'seg',o:[{v:'ok',l:'سهل'},{v:'part',l:'متوسط'},{v:'no',l:'متعب جدًا'}]}]},
+      {id:'F2-sc',  stim:'صحّح أخطاءه بنفسه؟', small:true, fields:[{k:'v',t:'seg',o:YNP}]},
+      {id:'F2-err', stim:'الكلمات التي أخطأ فيها', small:true, fields:[{k:'said',t:'text',ph:'الكلمة = ما قاله'}]}
+    ]},
+  { id:'F2q', skip:'لا تطبّقيه الآن — شرط القراءة الأساسية لم يتحقق.', title:'أسئلة الفهم — الفقرة ٢', fields:[F_MARK,F_SAID],
+    items: mk('F2q', [['إلى أين سافر خالد؟','الصحراء'],['بماذا ركبوا؟','سيارة كبيرة'],['ماذا فعلوا عند الغروب؟','أشعلوا نارًا وجلسوا حولها'],['بماذا استمتع خالد؟','برؤية النجوم']]).map(x => Object.assign(x,{small:true})) }
+  ]},
+{ id:'G', tab:'ز. اللغة الشفهية', title:'اللغة الشفهية', eyebrow:'القسم ز — ملاحظة لا تشخيص',
+  lead:'محادثة طبيعية بلهجته. هذا القسم لا يشخّص أي اضطراب لغوي. فهم جيد مع تعبير ضعيف واضح ومتكرر يستدعي الإحالة لأخصائي نطق ولغة ناطق بالعربية.',
+  fid:'<b>الطريقة:</b> لا تكمل جملته إذا توقف يبحث عن كلمة. انتظر ثانيتين أو ثلاثًا وسجّل ما فعله.',
+  groups:[
+  { id:'G1', title:'الفهم', fields:[{k:'mark',t:'seg',o:DID},F_SAID],
+    items: mk('G1', [['تعليمات خطوة واحدة','«جيب لي القلم»'],['تعليمات خطوتين','«خذ الكتاب وحطه على الطاولة»'],['تعليمات ثلاث خطوات','«روح خذ الكوب، عبّه ماء، وحطه هنا»'],['مفاهيم علائقية','«حط القلم تحت الكتاب»'],['فهم قصة مسموعة','احكِ قصة قصيرة واسأله سؤالين']]).map(x => Object.assign(x,{small:true})) },
+  { id:'G2', title:'التعبير', fields:[{k:'mark',t:'seg',o:DID},F_SAID],
+    items: mk('G2', [['تسمية الأشياء','سمِّ ١٠ صور أو أشياء متنوعة'],['تركيب الجملة','صف صورة فيها أحداث'],['الوصف','«صف لي غرفتك»'],['إعادة سرد قصة','احكِ قصة ويعيدها بكلماته'],['الشرح','«ليش تحب كرة القدم؟»'],['الترتيب الزمني','«احكِ لي وش صار اليوم بالترتيب»']]).map(x => Object.assign(x,{small:true})) },
+  { id:'G3', title:'إيجاد الكلمة', fields:[{k:'mark',t:'seg',o:YN},F_SAID],
+    items: mk('G3', [['توقفات وتردد بحثًا عن كلمة'],['كلمات عامة غامضة («هذا الشي»)'],['وصف ملتف بدل الكلمة نفسها'],['يقول «أعرفها بس نسيت اسمها»'],['يتحسّن إذا أعطيته أول صوت'],['يتعرّف على الكلمة من خيارات']]).map(x => Object.assign(x,{small:true})) },
+  { id:'G4', title:'السرد', fields:[{k:'mark',t:'seg',o:YNP},F_SAID],
+    items: mk('G4', [['بداية واضحة'],['تسلسل منطقي للأحداث'],['تفاصيل مهمة'],['سبب ونتيجة'],['خاتمة']]).map(x => Object.assign(x,{small:true})) }
+  ]},
+{ id:'H', tab:'ح. الرياضيات', title:'الرياضيات', eyebrow:'القسم ح',
+  lead:'استخدام الأصابع ليس علامة ضعف، سجّله كطريقة فقط.',
+  fid:'<b>الطريقة:</b> أعطه وقتًا بلا ضغط ولا تعطه الجواب. إن غيّرت صياغة مسألة فاكتب ذلك في الخانة.',
+  groups:[
+  { id:'H1', title:'١. معرفة الأعداد',
+    items:[
+      {id:'H1-1', stim:'تسمية الأرقام ١–٢٠ بترتيب عشوائي', small:true, fields:[{k:'n',t:'num',max:20,suffix:'من ٢٠'},F_SAID]},
+      {id:'H1-2', stim:'العدّ شفهيًا حتى ١٠٠', small:true, fields:[{k:'n',t:'num',max:100,suffix:'توقف عند'},F_SAID]},
+      {id:'H1-3', stim:'أي الكميتين أكثر؟ (٣ محاولات)', small:true, fields:[{k:'n',t:'num',max:3,suffix:'من ٣'},F_SAID]},
+      {id:'H1-4', stim:'رتّب: ٧، ٣، ٩، ١', small:true, fields:[F_MARK,F_SAID]},
+      {id:'H1-5', stim:'الرقم الناقص: ٤، ٥، ـــ، ٧', small:true, fields:[F_MARK,F_SAID]}
+    ]},
+  { id:'H2', title:'٢. الحسّ العددي', fields:[F_MARK,F_SAID],
+    items: mk('H2', [['أيّ أكبر: ٨ أو ١٢؟'],['٧ = ٥ + كم؟'],['عندك ١٠ حلاوات وأعطيت ٤، كم بقي؟ (بلا ورقة)']]).map(x => Object.assign(x,{small:true})) },
+  { id:'H3', title:'٣. القيمة المكانية', fields:[F_MARK,F_SAID],
+    items: mk('H3', [['كم آحاد وكم عشرات في ٣٤؟'],['كم مئات وعشرات وآحاد في ١٤٦؟']]).map(x => Object.assign(x,{small:true})) },
+  { id:'H4', title:'٤. العمليات', how:'الضرب فقط إن أظهر فهمًا للجمع المتكرر.',
+    fields:[F_MARK,{k:'said',t:'text',ph:'إجابته'},
+      {k:'strat',t:'seg',label:'الطريقة',o:[{v:'fing',l:'أصابع'},{v:'on',l:'عدّ تصاعدي'},{v:'mind',l:'ذهني'},{v:'paper',l:'كتابة'},{v:'guess',l:'تخمين'}]},
+      {k:'speed',t:'seg',label:'السرعة',o:[{v:'ok',l:'سريع'},{v:'part',l:'بطيء'}]}, F_MC],
+    items: mk('H4', [['٣ + ٤','٧'],['٧ + ٢','٩'],['٨ − ٣','٥'],['١٢ − ٥','٧'],['٢ × ٣','٦'],['٤ × ٢','٨']]) },
+  { id:'H5', title:'٥. مسائل كلامية', how:'الأبعاد الثلاثة منفصلة: صعوبة اللغة قد تبدو كأنها صعوبة رياضيات.',
+    fields:[{k:'lang',t:'seg',o:YN,label:'فهم الصياغة'},{k:'op',t:'seg',o:YN,label:'اختار العملية'},{k:'calc',t:'seg',o:YN,label:'الحساب صحيح'},{k:'said',t:'text',ph:'إجابته'},F_MC],
+    items: mk('H5', [['عندك ١٥ ريال، اشتريت شيئًا بـ٦ ريال، كم بقي معك؟','٩'],['عند صديقك ٣ علب، في كل علبة ٤ أقلام، كم قلمًا عنده؟','١٢']]).map(x => Object.assign(x,{small:true})) },
+  { id:'H6', title:'٦. «كيف عرفت؟»', how:'بعد إجابة صحيحة: هل يشرح المنطق، أم يكرر خطوات بلا فهم؟',
+    fields:[{k:'mark',t:'seg',o:[{v:'ok',l:'يفهم الفكرة'},{v:'part',l:'غير واضح'},{v:'no',l:'لا يظهر فهمًا'}]},{k:'said',t:'area',ph:'ما قاله في شرحه'}],
+    items:[{id:'H6-1', stim:'شرحه لطريقته', small:true}] }
+  ]}
+];
+
+const PROBES = {
+  A: { name:'المسبار أ — صوت الحرف', cat:'ربط الحرف بصوته فقط',
+       eg:'مثال: صوت حرف «ذ» (اختر ٤–٦ حروف لم يعرف صوتها في القسم ب)',
+       cues:[['١ — تلميح بسيط','أشر إلى كلمة مألوفة يعرفها تبدأ بهذا الحرف، دون أن تنطق الصوت'],
+             ['٢ — تلميح أقوى','أرِه شكل الفم ومخرج الصوت دون أن تنطقه كاملًا'],
+             ['٣ — تعرّف','انطق ٣ أصوات واطلب منه أن يختار الصوت الصحيح']] },
+  B: { name:'المسبار ب — نمط فك رموز', cat:'نمط مقطعي واحد فقط',
+       eg:'مثال: مقطع مغلق بساكن (اختر ٤–٦ أمثلة لنمط واحد أخطأ فيه في القسم ج)',
+       cues:[['١ — تلميح بسيط','أشر إلى جزء من الكلمة سبق أن أتقنه'],
+             ['٢ — تلميح أقوى','انطق المقطع الأول فقط'],
+             ['٣ — تعرّف','اكتب ٣ كلمات واطلب منه أن يختار المطلوبة']] }
+};
+
+/* ============ STATE ============ */
+const store = {};               // path -> doc object
+const dirty = new Set();        // paths with unsaved local edits
+let db = null, dbMode = 'pending';
+let tab = 'sessions', probeId = 'A';
+let currentSid = null;
+const LS_KEY = 'baseline-v22-fallback';
+try { currentSid = localStorage.getItem('bl-sid') || null; tab = localStorage.getItem('bl-tab') || 'sessions'; } catch(e) {}
+
+const get = p => store[p] || (store[p] = {});
+function deepGet(o, kp){ return kp.split('.').reduce((a, k) => a == null ? undefined : a[k], o); }
+function deepSet(o, kp, v){
+  const ks = kp.split('.'); let cur = o;
+  for(let i = 0; i < ks.length - 1; i++){
+    const k = ks[i], nk = ks[i+1];
+    if(cur[k] == null) cur[k] = /^\d+$/.test(nk) ? [] : {};
+    cur = cur[k];
+  }
+  cur[ks[ks.length-1]] = v;
+}
+
+/* ============ SAVING ============ */
+const saver = { timers:{}, busy:{}, again:{} };
+function setStatus(){
+  const el = $('#saveState');
+  if(dbMode === 'pending'){ el.className = 'pill'; el.textContent = 'جارٍ الاتصال…'; return; }
+  if(dbMode === 'local'){ el.className = 'pill err'; el.textContent = 'حفظ على هذا الجهاز فقط'; return; }
+  if(dbMode === 'error'){ el.className = 'pill err'; el.textContent = 'تعذّر الحفظ — تحقق من الاتصال'; return; }
+  if(dirty.size){ el.className = 'pill busy'; el.textContent = 'يحفظ…'; return; }
+  el.className = 'pill ok'; el.textContent = 'محفوظ ✓';
+}
+function queueSave(path){
+  dirty.add(path); setStatus();
+  clearTimeout(saver.timers[path]);
+  saver.timers[path] = setTimeout(() => { saver.timers[path] = null; flush(path); }, 600);
+}
+async function flush(path){
+  if(saver.busy[path]){ saver.again[path] = true; return; }
+  saver.busy[path] = true;
+  const body = JSON.parse(JSON.stringify(get(path)));
+  try{
+    if(db){ await db.doc(path).set(body); if(dbMode === 'error') dbMode = 'live'; }
+    else saveLocal();
+  }catch(e){
+    if(e && e.code === 'unavailable'){ await new Promise(r => setTimeout(r, 800 + Math.random()*800)); try{ await db.doc(path).set(body); }catch(e2){ dbMode = 'error'; } }
+    else dbMode = 'error';
+  }
+  saver.busy[path] = false;
+  if(saver.again[path]){ saver.again[path] = false; return flush(path); }
+  if(!saver.timers[path] && dbMode !== 'error') dirty.delete(path);
+  setStatus();
+}
+function saveLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(store)); }catch(e){} }
+function loadLocal(){ try{ const s = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); Object.assign(store, s); }catch(e){} }
+
+function setField(path, kp, v){
+  const o = get(path);
+  deepSet(o, kp, v);
+  o.at = Date.now();
+  if(path.startsWith('responses/') && currentSid) o.sid = currentSid;
+  queueSave(path);
+  syncPath(path);
+  updateCounts();
+}
+
+/* ============ RENDER HELPERS ============ */
+function segHTML(path, f, extraAttr){
+  return `<div class="seg" data-doc="${path}" data-k="${f.k}" role="group" aria-label="${esc(f.label || 'التقييم')}">${f.label ? `<span class="seg-l">${esc(f.label)}</span>` : ''}${
+    f.o.map(o => `<button type="button" data-v="${o.v}" class="v-${['ok','no','na','part'].includes(o.v) ? o.v : 'other'}" aria-pressed="false" ${extraAttr||''}>${esc(o.l)}</button>`).join('')}</div>`;
+}
+function fieldHTML(path, f, extraAttr){
+  const fid = 'f-' + path.replace(/[^\w-]/g, '_') + '-' + f.k.replace(/\./g, '_');
+  if(f.t === 'seg') return segHTML(path, f, extraAttr);
+  if(f.t === 'text') return `<input class="tx" type="text" id="${fid}" data-doc="${path}" data-k="${f.k}" placeholder="${esc(f.ph || '')}" autocomplete="off" ${extraAttr||''}>`;
+  if(f.t === 'area') return `<textarea class="tx" id="${fid}" data-doc="${path}" data-k="${f.k}" placeholder="${esc(f.ph || '')}" ${extraAttr||''}></textarea>`;
+  if(f.t === 'date' || f.t === 'time') return `<input class="tx" type="${f.t}" id="${fid}" data-doc="${path}" data-k="${f.k}" ${extraAttr||''}>`;
+  if(f.t === 'num') return `<label class="num"><input type="number" inputmode="numeric" min="0" ${f.max != null ? `max="${f.max}"` : ''} id="${fid}" data-doc="${path}" data-k="${f.k}" ${extraAttr||''}> ${esc(f.suffix || '')}</label>`;
+  if(f.t === 'codes') return `<div class="codes" data-doc="${path}" data-k="${f.k}" data-codes="1"><span class="cl">نوع الخطأ (اختر ما ينطبق)</span>${f.set.map(c => `<button type="button" data-c="${esc(c)}" aria-pressed="false">${esc(c)}</button>`).join('')}</div>`;
+  return '';
+}
+
+/* sync every bound control for one doc path */
+function syncPath(path){
+  const o = store[path] || {};
+  document.querySelectorAll(`[data-doc="${path}"]`).forEach(el => {
+    const k = el.dataset.k, v = deepGet(o, k);
+    if(el.classList.contains('seg')){
+      el.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+    } else if(el.dataset.codes){
+      const arr = Array.isArray(v) ? v : [];
+      el.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(arr.includes(b.dataset.c))));
+      const hasMark = !!el.closest('.item') && !!el.closest('.item').querySelector('.seg[data-k="mark"]');
+      el.hidden = hasMark ? !(deepGet(o, 'mark') === 'no' || arr.length) : false;
+    } else if(el.matches('input,textarea')){
+      if(document.activeElement !== el) el.value = v == null ? '' : v;
+    }
+  });
+  if(path.startsWith('probes/')) syncProbe();
+  if(path.startsWith('sessions/')) renderSessChip();
+}
+function syncAll(){ Object.keys(store).forEach(syncPath); document.querySelectorAll('[data-doc]').forEach(el => { if(!store[el.dataset.doc]) syncPath(el.dataset.doc); }); }
+
+/* ============ COUNTS ============ */
+function itemFilled(id){
+  const o = store['responses/' + id]; if(!o) return false;
+  return ['mark','name','sound','n','v','lang','said'].some(k => o[k] != null && o[k] !== '');
+}
+function sectionCount(sec){
+  let done = 0, total = 0;
+  sec.groups.forEach(g => { if(g.skip) return; g.items.forEach(it => { if(it.skip) return; total++; if(itemFilled(it.id)) done++; }); });
+  return [done, total];
+}
+function groupScore(g){
+  const marks = g.items.map(it => (store['responses/' + it.id] || {}));
+  const hasMark = (g.fields || []).some(f => f.k === 'mark') || g.items.some(it => (it.fields || []).some(f => f.k === 'mark'));
+  if(g.id === 'B1'){
+    const nm = marks.filter(r => r.name === 'ok').length, sd = marks.filter(r => r.sound === 'ok').length;
+    const nT = marks.filter(r => r.name).length, sT = marks.filter(r => r.sound).length;
+    return `الأسماء ${ar(nm)} من ${ar(nT)} مُختبَر · الأصوات ${ar(sd)} من ${ar(sT)} مُختبَر · (من ٢٨)`;
+  }
+  if(hasMark){
+    const ok = marks.filter(r => r.mark === 'ok').length;
+    const applied = marks.filter(r => r.mark && r.mark !== 'na').length;
+    return `${ar(ok)} صحيح من ${ar(applied)} مُطبَّق (من ${ar(g.items.length)})`;
+  }
+  return '';
+}
+function updateCounts(){
+  SECTIONS.forEach(sec => {
+    const el = document.querySelector(`#tabs [data-tab="${sec.id}"] .cnt`);
+    if(el){ const [d,t] = sectionCount(sec); el.textContent = `${ar(d)}/${ar(t)}`; }
+  });
+  document.querySelectorAll('[data-gscore]').forEach(el => {
+    const g = findGroup(el.dataset.gscore); if(g) el.textContent = groupScore(g);
+  });
+  const gate = $('#gateInfo'); if(gate) gate.innerHTML = gateText();
+}
+function findGroup(id){ for(const s of SECTIONS) for(const g of s.groups) if(g.id === id) return g; return null; }
+function gateText(){
+  let ok = 0, ap = 0;
+  ['C1','C2','C3','C4'].forEach(gid => findGroup(gid).items.forEach(it => { const r = store['responses/' + it.id] || {}; if(r.mark && r.mark !== 'na'){ ap++; if(r.mark === 'ok') ok++; } }));
+  const p1 = (store['responses/F1-acc'] || {}).n;
+  const pct = ap ? Math.round(ok / ap * 100) : null;
+  return `<b>نتيجة مراحل فك الرموز ١–٤ حتى الآن:</b> ${ap ? `${ar(ok)} من ${ar(ap)} (${ar(pct)}٪)` : 'لم تُسجَّل بعد'}${p1 != null && p1 !== '' ? ` · <b>دقة الفقرة ١:</b> ${ar(p1)} من ٢٠ (${ar(Math.round(p1/20*100))}٪)` : ''}`;
+}
+
+/* ============ TABS ============ */
+const TABS = [{id:'sessions', l:'الجلسات'}].concat(SECTIONS.map(s => ({id:s.id, l:s.tab, cnt:true}))).concat([{id:'I', l:'ط. التعلّم والاحتفاظ', probe:true},{id:'sum', l:'الملخص'}]);
+function renderTabs(){
+  $('#tabs').innerHTML = TABS.map(t => `<button type="button" data-tab="${t.id}" class="${t.probe ? 'probe-tab' : ''}" aria-current="${t.id === tab}">${esc(t.l)}${t.cnt ? '<span class="cnt"></span>' : ''}</button>`).join('');
+  updateCounts();
+}
+function go(id){
+  tab = id; try{ localStorage.setItem('bl-tab', id); }catch(e){}
+  document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-current', String(b.dataset.tab === id)));
+  render();
+  window.scrollTo({top:0});
+}
+
+/* ============ SECTION VIEW ============ */
+function renderSection(sec){
+  let h = `<div class="sec-head"><div class="eyebrow">${esc(sec.eyebrow)} · أداء أساسي — لا تعليم أثناءه</div><h2>${esc(sec.title)}</h2><p class="lead">${esc(sec.lead)}</p></div>`;
+  h += `<div class="note">${sec.fid}</div>`;
+  if(sec.gate) h += `<div class="note gold" id="gateInfo">${gateText()}</div>`;
+  if(!currentSid) h += `<div class="note warn"><b>لا توجد جلسة حالية.</b> افتح «الجلسات» وابدأ جلسة، حتى نعرف في أي جلسة سُجّلت كل إجابة.</div>`;
+  sec.groups.forEach(g => {
+    h += `<section class="group${g.skip ? ' skipped' : ''}"><header><h3>${esc(g.title)}</h3><span class="gscore" data-gscore="${g.id}"></span></header>`;
+    if(g.skip) h += `<div class="skipnote">⛔ ${esc(g.skip)}</div>`;
+    if(g.how) h += `<div class="how">${esc(g.how)}</div>`;
+    if(g.passage) h += `<div class="passage">${esc(g.passage)}<div><button type="button" class="showbtn" data-show="${esc(g.passage)}" data-long="1">اعرض الفقرة للطفل</button></div></div>`;
+    g.items.forEach(it => {
+      const fields = it.fields || g.fields || [];
+      const path = 'responses/' + it.id;
+      const off = (g.skip || it.skip) ? 'disabled' : '';
+      h += `<div class="item${it.skip ? ' skipped' : ''}"><div class="stimbox"><span class="stim ${it.small ? 'small' : ''}">${esc(it.stim)}</span>${it.key ? `<span class="key">${esc(it.key)}</span>` : ''}${g.show && !it.small ? `<button type="button" class="showbtn" data-show="${esc(it.show || it.stim)}">اعرض للطفل</button>` : ''}</div>`;
+      h += `<div class="fields">`;
+      const segs = fields.filter(f => f.t === 'seg' || f.t === 'num').map(f => fieldHTML(path, f, off)).join('');
+      if(segs) h += `<div class="row">${segs}</div>`;
+      fields.filter(f => f.t !== 'seg' && f.t !== 'num').forEach(f => { h += fieldHTML(path, f, off); });
+      h += `</div></div>`;
+    });
+    h += `</section>`;
+  });
+  return h;
+}
+
+/* ============ PROBE VIEW ============ */
+function probeDoc(pid){
+  const p = 'probes/' + pid, o = get(p);
+  if(!Array.isArray(o.targets)) o.targets = [{},{},{},{}];
+  while(o.targets.length < 4) o.targets.push({});
+  return o;
+}
+function filledTargets(o){ return o.targets.map((t, i) => [t, i]).filter(([t]) => t && t.t && String(t.t).trim()); }
+function cueLocked(o){ const f = filledTargets(o); return !f.length || f.some(([t]) => !t.h24); }
+function tLabel(i){ return `<span class="tname" data-tlabel="${i}"><span class="n">${ar(i+1)}.</span><span class="tl"></span></span>`; }
+function renderProbe(){
+  const pid = probeId, P = PROBES[pid], o = probeDoc(pid), path = 'probes/' + pid;
+  const idx = o.targets.map((_, i) => i);
+  let h = `<div class="sec-head"><div class="eyebrow probe">القسم ط — مسبار منفصل · هنا فقط يوجد تعليم متعمد</div><h2>التعلّم — الاحتفاظ — الاسترجاع — التعميم</h2>
+  <p class="lead">كل مسبار فئة واحدة فقط. اختر الأهداف بعد تصحيح الأقسام أ–ح. هذا ليس اختبار ذاكرة، بل وصف لطريقة تعلّمه.</p></div>`;
+  h += `<div class="probe-switch">${['A','B'].map(k => `<button type="button" data-probe="${k}" aria-pressed="${k === pid}">${esc(PROBES[k].name)}</button>`).join('')}</div>`;
+
+  // 1 targets
+  h += `<section class="stage"><header><h3>١. الأهداف — ما قبل التعلّم</h3><span class="tag grey">اليوم ١</span></header>
+    <div class="how" style="padding:8px 16px;font-size:13px;color:var(--muted);background:var(--sunk)">${esc(P.cat)}. ${esc(P.eg)}. إن عرف هدفًا قبل التعليم فاستبدله.</div>`;
+  idx.forEach(i => {
+    h += `<div class="trow"><span class="tname"><span class="n">${ar(i+1)}.</span>الهدف</span><div class="fields">
+      ${fieldHTML(path, {k:`targets.${i}.t`, t:'text', ph:'اكتب الهدف'})}
+      <div class="row">${fieldHTML(path, {k:`targets.${i}.pre`, t:'seg', label:'قبل التعليم', o:[{v:'no',l:'لا يعرفه'},{v:'ok',l:'يعرفه — استبدله'}]})}</div></div></div>`;
+  });
+  h += `<div class="trow"><span></span><div class="row">${o.targets.length < 6 ? '<button type="button" class="btn ghost" data-addt="1">+ هدف آخر</button>' : ''}${o.targets.length > 4 ? '<button type="button" class="btn ghost" data-delt="1">حذف آخر هدف</button>' : ''}</div></div></section>`;
+
+  // 2 teaching
+  h += `<section class="stage"><header><h3>٢. التعليم</h3><span class="tag grey">اليوم ١</span></header>
+    <div class="how" style="padding:8px 16px;font-size:13px;color:var(--muted);background:var(--sunk)">نفس الأسلوب لكل هدف: أنا أسوي ← نسوي مع بعض ← يسوي هو. «معيار الجلسة» = ٣ إجابات صحيحة مستقلة تفصل بينها أسئلة أخرى. معيار عملي داخل الجلسة، وليس عتبة إتقان مثبتة.</div>`;
+  idx.forEach(i => {
+    h += `<div class="trow">${tLabel(i)}<div class="fields"><div class="row">
+      ${fieldHTML(path, {k:`targets.${i}.trials`, t:'num', suffix:'محاولات تعليم'})}
+      ${fieldHTML(path, {k:`targets.${i}.reps`, t:'num', suffix:'تكرارات'})}
+      ${fieldHTML(path, {k:`targets.${i}.first`, t:'num', suffix:'أول إجابة صحيحة مستقلة: المحاولة رقم'})}</div>
+      <div class="row">${fieldHTML(path, {k:`targets.${i}.support`, t:'seg', label:'الدعم', o:[{v:'vis',l:'بصري'},{v:'verb',l:'لفظي'},{v:'both',l:'الاثنان'},{v:'none',l:'بدون'}]})}
+      ${fieldHTML(path, {k:`targets.${i}.crit`, t:'seg', label:'معيار الجلسة', o:[{v:'ok',l:'تحقق'},{v:'no',l:'لم يتحقق'}]})}</div></div></div>`;
+  });
+  h += `</section>`;
+
+  // 3 immediate
+  h += `<section class="stage"><header><h3>٣. الاستدعاء الفوري — نهاية جلسة التعليم</h3><span class="tag grey">اليوم ١</span></header>`;
+  idx.forEach(i => { h += `<div class="trow">${tLabel(i)}<div class="row">${fieldHTML(path, {k:`targets.${i}.imm`, t:'seg', o:[{v:'ok',l:'✓ صح'},{v:'no',l:'✗ خطأ'}]})}</div></div>`; });
+  h += `<div class="trow"><span></span><div class="fields"><div class="row"><button type="button" class="btn probe" data-teachat="1">سجّل وقت انتهاء التعليم</button><span id="teachAtTxt" class="key"></span></div>
+    <div class="note warn" style="margin:4px 0 0"><b>بعد الجلسة:</b> لا تراجع معه الأهداف ولا تذكّره بها حتى قياس الغد.</div></div></div></section>`;
+
+  // 4 primary 24h
+  h += `<section class="stage primary"><header><h3>٤. بعد ٢٤ ساعة — الاستدعاء المستقل</h3><span class="tag">⭐ المقياس الرئيسي</span></header>
+    <div class="note gold" style="margin:12px 16px"><b>اختبر كل الأهداف أولًا بلا أي مساعدة.</b> لا تقل «صح» أو «خطأ»، ولا تلمّح، ولا تعيد التعليم، حتى تسجّل إجابة كل الأهداف. <span id="elapsed"></span></div>`;
+  idx.forEach(i => {
+    h += `<div class="trow">${tLabel(i)}<div class="fields"><div class="row">${fieldHTML(path, {k:`targets.${i}.h24`, t:'seg', o:[{v:'ok',l:'✓ صح'},{v:'no',l:'✗ خطأ'},{v:'na',l:'لم يستجب'}]})}</div>
+      ${fieldHTML(path, {k:`targets.${i}.h24said`, t:'text', ph:'ما قاله بالضبط'})}</div></div>`;
+  });
+  h += `</section>`;
+
+  // 5 cueing
+  h += `<section class="stage"><header><h3>٥. سُلّم التلميح</h3><span class="tag grey">بعد القياس الرئيسي فقط</span></header>
+    <div class="note warn" id="cueLock" style="margin:12px 16px"></div>
+    <div class="tablewrap" style="padding:0 16px 10px"><table class="ref"><tr><th>المستوى</th><th>ما تقوله أو تفعله (${esc(P.cat)})</th></tr>${P.cues.map(c => `<tr><td>${esc(c[0])}</td><td>${esc(c[1])}</td></tr>`).join('')}</table></div>
+    <div class="how" style="padding:8px 16px;font-size:13px;color:var(--muted);background:var(--sunk)">للأهداف التي لم يتذكرها فقط. التعرّف من خيارات أسهل من التذكر، ولا يُحسب مثله.</div>`;
+  idx.forEach(i => {
+    const L = 'data-lock="1"';
+    h += `<div class="trow">${tLabel(i)}<div class="fields">
+      <div class="row">${fieldHTML(path, {k:`targets.${i}.cueLvl`, t:'seg', label:'أقل مستوى نجح', o:[{v:'1',l:'١'},{v:'2',l:'٢'},{v:'3',l:'٣'},{v:'no',l:'لم ينجح'}]}, L)}</div>
+      ${fieldHTML(path, {k:`targets.${i}.cue`, t:'text', ph:'التلميح الذي قلته بالضبط'}, L)}
+      ${fieldHTML(path, {k:`targets.${i}.rch`, t:'text', ph:'خيارات التعرّف المعروضة (إن وصلت للمستوى ٣)'}, L)}
+      ${fieldHTML(path, {k:`targets.${i}.rsel`, t:'text', ph:'ما اختاره'}, L)}</div></div>`;
+  });
+  h += `<div class="trow"><span></span><p class="key" style="margin:0">إعادة التعليم مسموحة فقط بعد انتهاء هذه الخطوة.</p></div></section>`;
+
+  // 6 72h & 7d
+  h += `<section class="stage"><header><h3>٦. بعد ٧٢ ساعة</h3><span class="tag grey">بعد استرجاع وتلميح سابق — ليس احتفاظًا نقيًا</span></header>`;
+  idx.forEach(i => { h += `<div class="trow">${tLabel(i)}<div class="row">${fieldHTML(path, {k:`targets.${i}.h72i`, t:'seg', label:'مستقل', o:OK2})}${fieldHTML(path, {k:`targets.${i}.h72c`, t:'seg', label:'بتلميح', o:OK2})}</div></div>`; });
+  h += `</section><section class="stage"><header><h3>٧. بعد ٧ أيام</h3><span class="tag grey">اختياري</span></header>`;
+  idx.forEach(i => { h += `<div class="trow">${tLabel(i)}<div class="row">${fieldHTML(path, {k:`targets.${i}.d7i`, t:'seg', label:'مستقل', o:OK2})}${fieldHTML(path, {k:`targets.${i}.d7c`, t:'seg', label:'بتلميح', o:OK2})}</div></div>`; });
+  h += `</section>`;
+
+  // 8 generalization
+  h += `<section class="stage"><header><h3>٨. التعميم</h3><span class="tag grey">أمثلة جديدة لم يتدرّب عليها</span></header>
+    <div class="trow"><span class="tname">الأمثلة الجديدة</span><div class="fields">${fieldHTML(path, {k:'genItems', t:'text', ph:'اكتب الأمثلة الجديدة التي عرضتها'})}
+    <div class="row">${fieldHTML(path, {k:'genOk', t:'num', suffix:'صحيح من'})}${fieldHTML(path, {k:'genTotal', t:'num', suffix:'مثال'})}</div></div></div>
+    <div class="trow"><span class="tname">ملاحظاتك</span>${fieldHTML(path, {k:'notes', t:'area', ph:'أي نمط لاحظته، بالوصف فقط ودون أي تسمية تشخيصية'})}</div></section>`;
+  return h;
+}
+function syncProbe(){
+  if(tab !== 'I') return;
+  const o = probeDoc(probeId);
+  document.querySelectorAll('[data-tlabel]').forEach(el => {
+    const t = o.targets[+el.dataset.tlabel] || {};
+    el.querySelector('.tl').textContent = t.t ? t.t : '— لم يُكتب بعد';
+  });
+  const locked = cueLocked(o);
+  document.querySelectorAll('[data-lock]').forEach(el => { el.disabled = locked; });
+  const lock = $('#cueLock');
+  if(lock){
+    const f = filledTargets(o), miss = f.filter(([t]) => !t.h24).length;
+    lock.innerHTML = !f.length ? '<b>مقفل:</b> اكتب الأهداف أولًا.' :
+      locked ? `<b>مقفل حتى تكمل القياس الرئيسي:</b> بقي ${ar(miss)} ${miss === 1 ? 'هدف' : 'أهداف'} بلا إجابة مستقلة بعد ٢٤ ساعة.` :
+      '<b>مفتوح:</b> سُجّلت الإجابات المستقلة لكل الأهداف. ابدأ التلميح للأهداف التي لم يتذكرها.';
+    lock.className = locked ? 'note warn' : 'note probe';
+  }
+  const ta = $('#teachAtTxt'), el = $('#elapsed');
+  if(o.teachAt){
+    const d = new Date(o.teachAt), hrs = Math.floor((Date.now() - o.teachAt) / 3600000);
+    if(ta) ta.textContent = 'انتهى التعليم: ' + d.toLocaleString('ar-SA', {weekday:'long', hour:'numeric', minute:'2-digit'});
+    if(el) el.textContent = `مرّ ${ar(hrs)} ساعة منذ انتهاء التعليم.` + (hrs < 20 ? ' (مبكر — الأفضل قرابة ٢٤ ساعة)' : '');
+  } else { if(ta) ta.textContent = ''; if(el) el.textContent = ''; }
+}
+
+/* ============ SESSIONS VIEW ============ */
+const MOOD = [{v:'calm',l:'هادئ'},{v:'ok',l:'عادي'},{v:'tired',l:'متعب'},{v:'tense',l:'متوتر'}];
+function sessions(){ return Object.keys(store).filter(p => p.startsWith('sessions/')).map(p => [p, store[p]]).sort((a, b) => (b[1].created || 0) - (a[1].created || 0)); }
+function sessLabel(o){ return (o.date ? new Date(o.date + 'T12:00').toLocaleDateString('ar-SA', {weekday:'long', day:'numeric', month:'long'}) : 'جلسة بلا تاريخ') + (o.secs ? ' — ' + o.secs : ''); }
+function renderSessChip(){
+  const c = $('#sessChip'), o = currentSid && store['sessions/' + currentSid];
+  if(o){ c.className = 'sess-chip'; c.textContent = 'الجلسة: ' + sessLabel(o).split(' — ')[0]; }
+  else { c.className = 'sess-chip none'; c.textContent = 'لا توجد جلسة حالية'; }
+}
+function renderSessions(){
+  let h = `<div class="sec-head"><div class="eyebrow">ابدأ من هنا في كل مرة</div><h2>الجلسات</h2>
+    <p class="lead">ابدأ جلسة قبل أن تسجّل. كل إجابة تُربط بالجلسة الحالية وتُحفظ تلقائيًا، وأستطيع قراءتها من محادثتنا مباشرة. في آخر الجلسة عبّئ الملاحظات أدناه.</p></div>
+    <div class="note"><b>الخطة:</b> ١) أ + ب · ٢) ج + د · ٣) هـ + و (إن سمح الشرط) · ٤) ح + ز · ٥) المسبار أ: التعليم · بعد ٢٤ ساعة: المسبار أ القياس الرئيسي. كل جلسة ١٥–٢٥ دقيقة.</div>
+    <div class="row" style="margin:10px 0"><button type="button" class="btn" data-newsess="1">+ ابدأ جلسة جديدة</button></div>`;
+  const list = sessions();
+  if(!list.length) h += `<div class="note gold"><b>لا توجد جلسات بعد.</b> اضغط «ابدأ جلسة جديدة» قبل أول سؤال.</div>`;
+  list.forEach(([p, o]) => {
+    const sid = p.split('/')[1], cur = sid === currentSid;
+    h += `<div class="sess ${cur ? 'current' : ''}"><div class="head"><b>${esc(sessLabel(o))}</b>${cur ? '<span class="pill ok">الجلسة الحالية</span>' : `<button type="button" class="btn ghost" data-usesess="${sid}">اجعلها الحالية</button>`}</div>
+      <label class="fl">التاريخ${fieldHTML(p, {k:'date', t:'date'})}</label>
+      <label class="fl">الوقت${fieldHTML(p, {k:'time', t:'time'})}</label>
+      <label class="fl">المدة بالدقائق${fieldHTML(p, {k:'dur', t:'text', ph:'مثال: ٢٠'})}</label>
+      <label class="fl">الأقسام المطبّقة${fieldHTML(p, {k:'secs', t:'text', ph:'مثال: أ + ب'})}</label>
+      <label class="fl">النوم الليلة السابقة${fieldHTML(p, {k:'sleep', t:'text', ph:'تقريبًا، وهل شخر أو استيقظ'})}</label>
+      <label class="fl">مشتتات${fieldHTML(p, {k:'distr', t:'text', ph:'تلفزيون، ضيوف، جوال…'})}</label>
+      <div class="full">${fieldHTML(p, {k:'mood', t:'seg', label:'مزاجه قبل الجلسة', o:MOOD})}</div>
+      <label class="fl full">ملاحظات غير متوقعة${fieldHTML(p, {k:'notes', t:'area', ph:'أي شيء لافت حدث، حتى لو لم تعرف معناه'})}</label>
+      <label class="fl full">أهم شيء لاحظته كأخ${fieldHTML(p, {k:'bro', t:'area', ph:'انطباعك بكلماتك'})}</label></div>`;
+  });
+  return h;
+}
+function newSession(){
+  const sid = 's' + Date.now().toString(36);
+  const d = new Date(), pad = n => String(n).padStart(2, '0');
+  store['sessions/' + sid] = { created: Date.now(), date: `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`, time: `${pad(d.getHours())}:${pad(d.getMinutes())}` };
+  currentSid = sid; try{ localStorage.setItem('bl-sid', sid); }catch(e){}
+  queueSave('sessions/' + sid);
+  render(); renderSessChip();
+}
+
+/* ============ SUMMARY VIEW ============ */
+function codeStr(r){ return Array.isArray(r.codes) && r.codes.length ? ` [${r.codes.join('، ')}]` : ''; }
+function summaryText(){
+  const L = [];
+  L.push('ملخص سجل التقييم الأساسي — نسخة ٢.٢');
+  sessions().slice().reverse().forEach(([p, o], i) => {
+    L.push(`\n## الجلسة ${i+1}: ${sessLabel(o)}`);
+    if(o.time) L.push(`الوقت: ${o.time}`); if(o.dur) L.push(`المدة: ${o.dur} دقيقة`);
+    if(o.sleep) L.push(`النوم: ${o.sleep}`); if(o.mood) L.push(`المزاج: ${(MOOD.find(m => m.v === o.mood) || {}).l}`);
+    if(o.distr) L.push(`مشتتات: ${o.distr}`); if(o.notes) L.push(`ملاحظات غير متوقعة: ${o.notes}`); if(o.bro) L.push(`أهم شيء لاحظته كأخ: ${o.bro}`);
+  });
+  SECTIONS.forEach(sec => {
+    const lines = [];
+    sec.groups.forEach(g => {
+      const rows = g.items.map(it => [it, store['responses/' + it.id] || {}]).filter(([, r]) => Object.keys(r).some(k => k !== 'at' && k !== 'sid'));
+      if(!rows.length) return;
+      lines.push(`- ${g.title}: ${groupScore(g)}`);
+      rows.forEach(([it, r]) => {
+        const bits = [];
+        if(r.mark && r.mark !== 'ok') bits.push(r.mark === 'no' ? 'خطأ' : r.mark === 'na' ? 'لم يُطبَّق' : r.mark === 'part' ? 'جزئيًا' : r.mark);
+        if(g.id === 'B1'){ if(r.name === 'no') bits.push('الاسم خطأ'); if(r.sound === 'no') bits.push('الصوت خطأ'); }
+        if(r.n != null && r.n !== '') bits.push(`${r.n}`);
+        if(r.v) bits.push(r.v === 'ok' ? 'نعم/سهل' : r.v === 'part' ? 'متوسط/جزئيًا' : 'لا/متعب');
+        ['lang','op','calc'].forEach(k => { if(r[k]) bits.push(`${k === 'lang' ? 'فهم الصياغة' : k === 'op' ? 'العملية' : 'الحساب'}: ${r[k] === 'ok' ? 'نعم' : 'لا'}`); });
+        if(r.strat) bits.push(`الطريقة: ${({fing:'أصابع',on:'عدّ تصاعدي',mind:'ذهني',paper:'كتابة',guess:'تخمين'})[r.strat]}`);
+        if(r.speed) bits.push(r.speed === 'ok' ? 'سريع' : 'بطيء');
+        if(r.said) bits.push(`قال/كتب: «${r.said}»`);
+        if(bits.length || codeStr(r)) lines.push(`   • ${it.stim}: ${bits.join(' · ')}${codeStr(r)}`);
+      });
+    });
+    if(lines.length){ L.push(`\n## ${sec.tab}`); L.push(...lines); }
+  });
+  ['A','B'].forEach(pid => {
+    const o = store['probes/' + pid]; if(!o || !Array.isArray(o.targets)) return;
+    const f = filledTargets(o); if(!f.length) return;
+    L.push(`\n## ${PROBES[pid].name}`);
+    L.push('الهدف | قبل | محاولات | أول نجاح | معيار الجلسة | فوري | ٢٤ ساعة (مستقل) | ما قاله | أقل تلميح | ٧٢س مستقل/بتلميح');
+    const m = v => v === 'ok' ? '✓' : v === 'no' ? '✗' : v === 'na' ? 'لم يستجب' : '—';
+    f.forEach(([t]) => L.push(`${t.t} | ${t.pre === 'no' ? 'لا يعرفه' : t.pre === 'ok' ? 'يعرفه' : '—'} | ${t.trials || '—'} | ${t.first || '—'} | ${t.crit === 'ok' ? 'تحقق' : t.crit === 'no' ? 'لم يتحقق' : '—'} | ${m(t.imm)} | ${m(t.h24)} | ${t.h24said || '—'} | ${t.cueLvl || '—'}${t.cue ? ' («' + t.cue + '»)' : ''} | ${m(t.h72i)}/${m(t.h72c)}`));
+    const h24 = f.filter(([t]) => t.h24 === 'ok').length;
+    L.push(`المقياس الرئيسي بعد ٢٤ ساعة: ${h24} من ${f.length}`);
+    if(o.genTotal) L.push(`التعميم: ${o.genOk || 0} من ${o.genTotal}${o.genItems ? ' (' + o.genItems + ')' : ''}`);
+    if(o.notes) L.push(`ملاحظات: ${o.notes}`);
+  });
+  return L.join('\n');
+}
+function renderSummary(){
+  let h = `<div class="sec-head"><div class="eyebrow">للقراءة فقط</div><h2>الملخص</h2><p class="lead">أرقام وصفية فقط: «X صحيح من Y». أستطيع قراءة كل التفاصيل من المحادثة مباشرة، والنص أدناه للنسخ إن احتجته.</p></div>`;
+  h += `<table class="sumtable"><tr><th>المهمة</th><th>النتيجة</th></tr>`;
+  SECTIONS.forEach(sec => {
+    const [d, t] = sectionCount(sec);
+    h += `<tr class="sec"><td>${esc(sec.tab)}</td><td class="n">${ar(d)} من ${ar(t)} مُسجَّل</td></tr>`;
+    sec.groups.forEach(g => { const s = groupScore(g); if(s) h += `<tr><td>${esc(g.title)}</td><td class="n">${esc(s)}</td></tr>`; });
+  });
+  ['A','B'].forEach(pid => {
+    const o = store['probes/' + pid]; const f = o && Array.isArray(o.targets) ? filledTargets(o) : [];
+    h += `<tr class="sec"><td>${esc(PROBES[pid].name)}</td><td class="n">${f.length ? `بعد ٢٤ ساعة: ${ar(f.filter(([t]) => t.h24 === 'ok').length)} من ${ar(f.length)}` : 'لم يبدأ'}</td></tr>`;
+  });
+  h += `</table><div class="row" style="margin:14px 0 8px"><button type="button" class="btn" data-copy="1">انسخ الملخص نصًّا</button><span class="key" id="copyMsg"></span></div><pre class="out" id="sumOut">${esc(summaryText())}</pre>`;
+  return h;
+}
+
+/* ============ MAIN RENDER ============ */
+function render(){
+  const m = $('#main');
+  if(tab === 'sessions') m.innerHTML = renderSessions();
+  else if(tab === 'I') m.innerHTML = renderProbe();
+  else if(tab === 'sum') m.innerHTML = renderSummary();
+  else { const sec = SECTIONS.find(s => s.id === tab) || SECTIONS[0]; m.innerHTML = renderSection(sec); }
+  addGuide(m, tab);
+  syncAll(); updateCounts(); syncProbe();
+}
+function addGuide(m, id){
+  const head = m.querySelector('.sec-head'), h2 = head && head.querySelector('h2');
+  if(!h2 || !GUIDE[id]) return;
+  const row = document.createElement('div'); row.className = 'sec-title-row';
+  h2.replaceWith(row); row.appendChild(h2);
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'guide-btn'; b.textContent = '👨‍🏫 للمعلّم'; b.setAttribute('aria-expanded', 'false');
+  row.appendChild(b);
+  const g = document.createElement('div'); g.className = 'guide'; g.hidden = true; g.innerHTML = GUIDE[id];
+  head.after(g);
+  b.addEventListener('click', () => { g.hidden = !g.hidden; b.setAttribute('aria-expanded', String(!g.hidden)); });
+}
+
+/* ============ EVENTS ============ */
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if(b) go(b.dataset.tab); });
+$('#sessChip').addEventListener('click', () => go('sessions'));
+$('#main').addEventListener('click', e => {
+  const sb = e.target.closest('.seg button');
+  if(sb && !sb.disabled){
+    const seg = sb.closest('.seg'), path = seg.dataset.doc, k = seg.dataset.k;
+    const cur = deepGet(store[path] || {}, k);
+    setField(path, k, cur === sb.dataset.v ? null : sb.dataset.v);
+    return;
+  }
+  const cb = e.target.closest('.codes button');
+  if(cb){
+    const box = cb.closest('.codes'), path = box.dataset.doc, k = box.dataset.k;
+    const arr = (deepGet(store[path] || {}, k) || []).slice(), c = cb.dataset.c, i = arr.indexOf(c);
+    if(i >= 0) arr.splice(i, 1); else arr.push(c);
+    setField(path, k, arr); return;
+  }
+  const sh = e.target.closest('[data-show]');
+  if(sh){ const t = $('#stageText'); t.textContent = sh.dataset.show; t.className = 'big' + (sh.dataset.long ? ' text' : ''); $('#stage').hidden = false; return; }
+  if(e.target.closest('[data-newsess]')){ newSession(); return; }
+  const us = e.target.closest('[data-usesess]');
+  if(us){ currentSid = us.dataset.usesess; try{ localStorage.setItem('bl-sid', currentSid); }catch(e2){} render(); renderSessChip(); return; }
+  const pb = e.target.closest('[data-probe]');
+  if(pb){ probeId = pb.dataset.probe; render(); return; }
+  const path = 'probes/' + probeId;
+  if(e.target.closest('[data-addt]')){ const o = probeDoc(probeId); if(o.targets.length < 6){ o.targets.push({}); queueSave(path); render(); } return; }
+  if(e.target.closest('[data-delt]')){ const o = probeDoc(probeId); if(o.targets.length > 4){ o.targets.pop(); queueSave(path); render(); } return; }
+  if(e.target.closest('[data-teachat]')){ setField(path, 'teachAt', Date.now()); return; }
+  if(e.target.closest('[data-copy]')){
+    const txt = summaryText(), msg = $('#copyMsg');
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents($('#sumOut')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); msg.textContent = 'حدّدت النص — انسخه يدويًا'; };
+    try{ navigator.clipboard.writeText(txt).then(() => { msg.textContent = 'نُسخ ✓'; }, fallback); }catch(err){ fallback(); }
+  }
+});
+$('#main').addEventListener('input', e => {
+  const el = e.target; if(!el.dataset || !el.dataset.doc) return;
+  setField(el.dataset.doc, el.dataset.k, el.value);
+});
+$('#stage').addEventListener('click', () => { $('#stage').hidden = true; });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') $('#stage').hidden = true; });
+
+/* ============ BOOT ============ */
+renderTabs(); render(); renderSessChip(); setStatus();
+
+(function connect(){
+  db = { doc: p => ({ set: data => client.mutation(api.records.put, { path: p, data }) }) };
+  dbMode = 'live'; setStatus();
+  let first = true;
+  client.onUpdate(api.records.all, {}, rows => {
+    const seen = new Set();
+    let probeLenChanged = false, newSess = false;
+    rows.forEach(r => {
+      seen.add(r.path);
+      if(dirty.has(r.path)) return;
+      if(r.path.startsWith('sessions/') && !store[r.path]) newSess = true;
+      if(r.path === 'probes/' + probeId){ const a = (store[r.path] || {}).targets, b = (r.data || {}).targets; if(!a || !b || a.length !== b.length) probeLenChanged = true; }
+      store[r.path] = JSON.parse(JSON.stringify(r.data || {}));
+    });
+    if(first || tab === 'sum' || (tab === 'sessions' && newSess) || (tab === 'I' && probeLenChanged)) render(); else syncAll();
+    first = false;
+    updateCounts(); renderSessChip(); setStatus();
+  }, () => { dbMode = 'error'; setStatus(); });
+})();
+}
+
+(function(){
+  var client = new convex.ConvexClient("https://cheerful-civet-746.convex.cloud");
+  start(document.getElementById('app'), client, convex.anyApi);
+})();
+</script>
+</body>
+</html>

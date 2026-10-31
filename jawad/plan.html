@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>خطة جواد</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap">
+<style>
+[hidden]{display:none!important}
+:root{
+  --bg:#f2f4f3; --surface:#fff; --sunk:#e9edeb; --ink:#16262a; --muted:#5b6b6e; --line:#d4dbd9;
+  --accent:#0f5b62; --accent-ink:#fff; --accent-tint:#dcebec;
+  --ok:#2c7a4c; --ok-tint:#ddf0e3; --no:#a2392b; --no-tint:#f6e0dc; --warn:#8a5a00; --warn-tint:#fbefd2;
+  --f-body:'IBM Plex Sans Arabic',Tahoma,sans-serif; --f-stim:'Amiri','Traditional Arabic',serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1719; --surface:#162124; --sunk:#1c292d; --ink:#e3ebea; --muted:#9aabad; --line:#2a3a3e;
+  --accent:#62b4bb; --accent-ink:#0b1416; --accent-tint:#1c393c;
+  --ok:#6cc391; --ok-tint:#173225; --no:#ef8a7a; --no-tint:#3a1f1b; --warn:#e8b955; --warn-tint:#3a2e12; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px 80px}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 0 8px;border-bottom:1px solid var(--line)}
+.bar-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+h1{font-size:19px;margin:0;flex:1 1 auto}
+.pill{font-size:12px;padding:3px 9px;border-radius:99px;background:var(--sunk);color:var(--muted)}
+.pill.ok{background:var(--ok-tint);color:var(--ok)}
+.seg{display:flex;gap:6px;margin-top:8px}
+.seg button,.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:8px 14px;font:inherit;font-size:14px;cursor:pointer}
+.seg button[aria-pressed="true"],.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.no{background:var(--no);border-color:var(--no);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+a.link{color:var(--accent);font-size:13px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:14px}
+.card h2{font-size:17px;margin:0 0 6px}
+.card h3{font-size:15px;margin:12px 0 4px}
+.muted{color:var(--muted);font-size:14px}
+.note{background:var(--warn-tint);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:14px;margin:8px 0}
+.note.good{background:var(--ok-tint);color:var(--ok)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.chip{font-family:var(--f-stim);font-size:26px;background:var(--sunk);border-radius:10px;padding:2px 14px;cursor:pointer;border:1px solid transparent}
+.steps{display:flex;gap:4px;margin:12px 0 0;overflow-x:auto}
+.steps span{flex:1 0 auto;font-size:12px;text-align:center;padding:4px 6px;border-radius:8px;background:var(--sunk);color:var(--muted)}
+.steps span.on{background:var(--accent);color:var(--accent-ink)}
+.steps span.done{background:var(--ok-tint);color:var(--ok)}
+.big{font-family:var(--f-stim);font-size:min(30vw,170px);text-align:center;line-height:1.5;padding:10px 0;direction:rtl}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.row .grow{flex:1}
+label.f{display:block;font-size:14px;margin-top:10px}
+input,textarea,select{font:inherit;font-size:15px;width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+textarea{min-height:64px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:right}
+.res{font-variant-numeric:tabular-nums;font-weight:600}
+.dots{display:flex;gap:6px;justify-content:center;margin:6px 0}
+.dots i{width:12px;height:12px;border-radius:50%;background:var(--sunk);display:block}
+.dots i.ok,.dots i.no{background:var(--muted)}
+body.child .bar{display:none}
+body.child .wrap{max-width:none}
+body.child #main .big{font-size:min(32vw,260px);min-height:90vh;display:flex;align-items:center;justify-content:center} .dots i.cur{outline:2px solid var(--accent)}
+#stage{position:fixed;inset:0;background:var(--surface);z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#stage .close{position:absolute;top:12px;left:12px}
+#stage .nav{display:flex;gap:10px;position:absolute;bottom:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar">
+    <div class="bar-top">
+      <h1>خطة جواد · المرحلة الثانية</h1>
+      <span class="pill" id="save">جارٍ الاتصال…</span>
+    </div>
+    <div class="seg" id="who">
+      <button type="button" data-who="home">البيت</button>
+      <button type="button" data-who="school">المدرسة</button>
+      <a class="link" href="./" style="margin-inline-start:auto;align-self:center">سجل التقييم ←</a>
+    </div>
+  </div>
+  <main id="main"></main>
+</div>
+<div id="stage" hidden><button type="button" class="btn close">إغلاق ✕</button><div class="big" id="stageText"></div><div class="nav"><button class="btn" id="stPrev">→ السابق</button><button class="btn" id="stNext">التالي ←</button></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/convex@1.42.2/dist/browser.bundle.js"></script>
+<script>
+const WEEKS = [
+  {n:1, title:'الضمة مقابل الفتحة', cards:['بَ','بُ','مَ','مُ','لَ','لُ','سَ','سُ'],
+   teach:'اعرضي بطاقة الفتحة ثم الضمة لنفس الحرف: «هذي بَ… وهذي بُ — شوف الشكل فوقه». اقرئي أنتِ ← اقرؤوا معاً ← يقرأ لحاله.',
+   blend:['بَ بُ','مَ مُ','لُ لَ','سُ سَ','بُ مُ','لَ سَ'], blendTip:'زوجين من المقاطع، يقرأ الأيمن أولاً. الهدف ملاحظة الحركة، مو السرعة.',
+   write:['بُ','مَ','لُ','سَ'], num:'العدّ من ١ إلى ١٠ على خط الأعداد، مع الإشارة لكل رقم. ركّزي على ٧ و٨: «سبعة… ثمانية».'},
+  {n:2, title:'الكسرة، ثم الحركات الثلاث', cards:['بِ','مِ','لِ','سِ','بُ','مَ','لُ','سَ'],
+   teach:'ابدئي بالكسرة: «الخط تحت = إِ». بعد ٣ دقائق اخلطي الحركات الثلاث على نفس الحرف.',
+   blend:['بَ بُ بِ','مِ مَ مُ','لُ لِ لَ','سِ سُ سَ'], blendTip:'نفس الحرف بحركات مختلفة، من اليمين.',
+   write:['بِ','مُ','لِ','سُ'], num:'العدّ من ١ إلى ١٥ على خط الأعداد، ثم العدّ من رقم تختارينه (مثلاً من ٦ إلى ١٠).'},
+  {n:3, title:'المدود + ن، ت', cards:['بَا','بُو','بِي','مَا','مُو','نَ','نُ','تِ'],
+   teach:'المدّ = الحركة طويلة: «بَ… بَاااا». علّمي ن وت بالفتحة والضمة والكسرة.',
+   blend:['بَا','مُو','سِي','نَا','تُو','لِي'], blendTip:'الإصبع على الحرف، ثم يسحبه على حرف المدّ وهو يطوّل الصوت.',
+   write:['بَا','مُو','نِي','تَ'], num:'العدّ من ١ إلى ٢٠، والتركيز على ١٦ و١٨. اسأليه: «وش بعد ١٥؟ وش بعد ١٧؟»'},
+  {n:4, title:'كلمات من مقطعين + ر، د', cards:['بَاب','نَام','سُور','نُور','تُوت','دَار','دُود','رِيم'],
+   teach:'علّمي ر ود أولاً (دقيقتين). ثم الكلمة: الإصبع على أول حرف يمين ← المقطع ← المقطع الثاني ← الكلمة كاملة.',
+   blend:['بَاب','نَام','سُور','دَار','مَال','لُوز'], blendTip:'إذا بدأ من آخر الكلمة: لا تصححي بالكلام، حطي إصبعه على أول حرف من اليمين.',
+   write:['بَاب','نُور','دَار'], num:'جمع ضمن ١٠ على خط الأعداد: «أنت على ٤، تقدم ٣، وين وصلت؟»'},
+  {n:5, title:'كلمات بثلاث حركات + ق، ك', cards:['سَمَك','لَبَن','قَلَم','بَلَد','كَتَبَ','دَرَسَ','رَسَمَ','نَزَلَ'],
+   teach:'علّمي ق وك أولاً. ثم الكلمة حرفاً حرفاً من اليمين: سَ… مَ… كَ ← سَمَك.',
+   blend:['سَمَك','قَلَم','لَبَن','كَتَبَ','بَلَد','رَسَمَ'], blendTip:'غطّي الكلمة بورقة واكشفي حرفاً حرفاً من اليمين.',
+   write:['سَمَك','قَلَم','بَلَد'], num:'طرح ضمن ١٠ على خط الأعداد: «أنت على ٩، ارجع ٤».'},
+  {n:6, title:'جمل قصيرة + مراجعة', cards:['نَامَ تَامِر','رَسَمَ بَاب','لَبَن بَارِد','قَلَم سَامِي','كَتَبَ نُور','سَمَك كَبِير'],
+   teach:'يقرأ الكلمة الأولى، ثم الثانية، ثم الجملة كاملة. اسأليه بعدها سؤال فهم بسيط: «مين نام؟»',
+   blend:['نَامَ','تَامِر','بَارِد','سَامِي','كَبِير'], blendTip:'مراجعة كلمات الجمل لوحدها قبل الجملة.',
+   write:['نَامَ تَامِر','قَلَم'], num:'مراجعة: العدّ إلى ٢٠، وجمع وطرح ضمن ١٠.'}
+];
+const STEPS = ['الفحص','التعليم','الدمج','الكتابة','الأعداد','الختام'];
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const today = () => new Date().toLocaleDateString('en-CA');
+let recs = {}, put = null, who = 'home', view = 'home', cur = null, step = 0, pIdx = 0, timer = null, dirty = new Set();
+try { who = localStorage.getItem('jawad-who') || 'home'; } catch(e) {}
+
+function state(){ return recs['plan/state'] || {week:1}; }
+function week(){ return WEEKS[Math.min(Math.max(state().week|0,1),6)-1]; }
+function sessions(){ return Object.entries(recs).filter(([p,d]) => p.startsWith('plan/s-') && d && d.date).map(([p,d]) => ({id:p.slice(7), ...d})).sort((a,b) => (b.created||0)-(a.created||0)); }
+function score(s){ const pr = (s.probe||[]).filter(x => x.r); return pr.length ? pr.filter(x => x.r==='ok').length + ' من ' + pr.length : '—'; }
+function mastery(){
+  const w = state().week|0 || 1;
+  const hs = sessions().filter(s => s.by==='home' && s.week===w && s.done && (s.probe||[]).filter(x=>x.r).length===4);
+  const last2 = hs.slice(0,2);
+  return last2.length===2 && last2.every(s => s.probe.filter(x=>x.r==='ok').length>=3);
+}
+function save(path, data){
+  recs[path] = data; dirty.add(path); setSave('…');
+  clearTimeout(save.t[path]);
+  save.t[path] = setTimeout(() => {
+    put(path, {...data, at: Date.now()}).then(() => { dirty.delete(path); if(!dirty.size) setSave('ok'); }).catch(() => setSave('err'));
+  }, 600);
+}
+save.t = {};
+function setSave(s){ const el=$('#save'); el.className='pill'+(s==='ok'?' ok':''); el.textContent = s==='ok'?'محفوظ ✓':s==='err'?'لم يُحفظ — تحقق من الاتصال':'جارٍ الحفظ…'; }
+
+function pick4(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a.slice(0,4); }
+
+function stage(list, i){
+  let k = i||0; const show = () => { $('#stageText').textContent = list[k]; live(list[k]); $('#stPrev').disabled = k===0; $('#stNext').disabled = k===list.length-1; };
+  $('#stage').hidden = false; show();
+  $('#stPrev').onclick = () => { if(k>0){k--;show();} };
+  $('#stNext').onclick = () => { if(k<list.length-1){k++;show();} };
+}
+$('#stage .close').onclick = () => { $('#stage').hidden = true; live(''); };
+const CHILD = location.hash === '#child';
+if(CHILD) document.body.classList.add('child');
+function live(t){ if(put && !CHILD) put('plan/live', {t, at: Date.now()}).catch(()=>{}); }
+
+function render(){
+  if(CHILD){ const t=(recs['plan/live']||{}).t||''; $('#main').innerHTML = `<div class="big">${esc(t)||'<span style="font-size:40px;color:var(--muted)">🙂</span>'}</div>`; return; }
+  document.querySelectorAll('#who button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.who===who)));
+  if(view==='session' && cur) return renderSession();
+  if(who==='school') return renderSchool();
+  renderHome();
+}
+
+function renderHome(){
+  const w = week(), ss = sessions(), m = mastery();
+  const open = ss.find(s => s.by==='home' && !s.done && s.date===today());
+  $('#main').innerHTML = `
+  <div class="card">
+    <h2>الأسبوع ${w.n} من ٦: ${esc(w.title)}</h2>
+    <div class="chips">${w.cards.map((c,i)=>`<span class="chip" data-i="${i}">${esc(c)}</span>`).join('')}</div>
+    <p class="muted">اضغطي على أي بطاقة لعرضها كبيرة لجواد.</p>
+    ${m ? `<div class="note good">أتقن بطاقات هذا الأسبوع في جلستين متتاليتين ✓</div>` : `<p class="muted">الانتقال للأسبوع التالي بعد ٣ من ٤ في الفحص، جلستين ورا بعض.</p>`}
+    <div class="row">
+      <button class="btn primary grow" id="startBtn">${open ? 'أكملي جلسة اليوم' : 'ابدئي جلسة اليوم'}</button>
+    </div>
+    <div class="row">
+      <button class="btn" id="nextW" ${w.n>=6?'disabled':''} ${m?'':'title="لم يتحقق معيار الإتقان بعد"'}>${m?'انتقلي للأسبوع '+(w.n+1)+' ←':'تجاوز للأسبوع التالي (يدوي)'}</button>
+      <button class="btn" id="prevW" ${w.n<=1?'disabled':''}>→ ارجعي أسبوع</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>الجلسات</h2>
+    ${ss.length ? `<table><tr><th>التاريخ</th><th>من</th><th>الأسبوع</th><th>الفحص</th><th>ملاحظة</th></tr>
+    ${ss.slice(0,30).map(s=>`<tr><td>${esc(s.date)}</td><td>${s.by==='school'?'المدرسة':'البيت'}</td><td>${s.week||''}</td><td class="res">${s.by==='school'?'—':score(s)+(s.done?'':' (لم تكتمل)')}</td><td class="muted">${esc((s.note||s.hard||'').slice(0,60))}</td></tr>`).join('')}</table>` : '<p class="muted">لا توجد جلسات بعد.</p>'}
+  </div>
+  <div class="card">
+    <h2>شاشة جواد</h2>
+    <p class="muted">افتحي هذا الرابط على جهاز ثاني قدام جواد (آيباد أو جوال). يشوف البطاقة بس، وأنتِ تسجلين من جوالك بدون ما يشوف صح أو خطأ.</p>
+    <div class="row"><input readonly id="childUrl" value="${esc(location.href.split('#')[0])}#child"><button class="btn" id="copyChild">نسخ</button></div>
+  </div>
+  <div class="card">
+    <h2>لعبة وقت الانتظار</h2>
+    <p class="muted">لعبة «اسمع واختار» يلعبها جواد لحاله على الجوال: يسمع صوت ويختار البطاقة. تراجع بطاقات الأسبوع الحالي فقط، وما تظهر له أي علامة خطأ.</p>
+    <div class="row"><a class="btn" href="game.html#rec">١. سجّلي أصوات الأسبوع</a><a class="btn primary" href="game.html">٢. افتحي اللعبة لجواد</a></div>
+  </div>
+  <div class="card">
+    <h2>قواعد سريعة</h2>
+    <ul class="muted">
+      <li>بعد العصر أو أول المغرب، ٢٠ دقيقة، والجوال برا الغرفة.</li>
+      <li>في الفحص: لا مساعدة ولا تلميح. أي مساعدة = خطأ.</li>
+      <li>في التعليم: إذا أخطأ قولي الصح مباشرة وخليه يكرره.</li>
+      <li>إذا بدأ يتكلم بموضوع ثاني: «بعد هالبطاقة نتكلم».</li>
+      <li>اختمي دايم بشي ينجح فيه.</li>
+    </ul>
+  </div>`;
+  $('#main').querySelectorAll('.chip').forEach(c => c.onclick = () => stage(w.cards, +c.dataset.i));
+  $('#copyChild').onclick = () => { const i=$('#childUrl'); i.select(); try{navigator.clipboard.writeText(i.value);}catch(e){} $('#copyChild').textContent='تم ✓'; };
+  $('#startBtn').onclick = () => startSession('home', open);
+  $('#nextW').onclick = () => { if(!m && !confirmInline('nextW')) return; save('plan/state', {...state(), week: w.n+1}); render(); };
+  $('#prevW').onclick = () => { save('plan/state', {...state(), week: w.n-1}); render(); };
+}
+function confirmInline(id){ const b=$('#'+id); if(b.dataset.c) return true; b.dataset.c='1'; b.textContent='متأكدة؟ اضغطي مرة ثانية'; return false; }
+
+function startSession(by, existing){
+  if(existing){ cur = existing.id; }
+  else {
+    cur = Date.now().toString(36);
+    const w = week();
+    const prev = sessions().find(s => s.by==='home' && s.week===w.n);
+    save('plan/s-'+cur, {by, date: today(), time: new Date().toTimeString().slice(0,5), week: w.n, created: Date.now(),
+      probe: pick4(w.cards).map(item=>({item, r:''})), first: !prev, write:{}, num:'', mood:'', note:'', done:false});
+  }
+  step = 0; pIdx = 0; view = 'session'; render();
+}
+function S(){ return recs['plan/s-'+cur]; }
+function upd(fn){ const d = JSON.parse(JSON.stringify(S())); fn(d); save('plan/s-'+cur, d); }
+
+function renderSession(){
+  const s = S(); if(!s){ view='home'; return render(); }
+  const w = WEEKS[s.week-1];
+  const head = `<div class="steps">${STEPS.map((t,i)=>`<span class="${i===step?'on':i<step?'done':''}">${i+1}. ${t}</span>`).join('')}</div>`;
+  const nav = `<div class="row"><button class="btn" id="back" ${step===0?'disabled':''}>→ السابق</button><span class="grow"></span>
+    ${step<5?'<button class="btn primary" id="fwd">التالي ←</button>':'<button class="btn primary" id="finish">إنهاء الجلسة وحفظها</button>'}</div>`;
+  let body = '';
+  if(step===0){
+    const p = s.probe, it = p[pIdx];
+    body = `<h2>١. الفحص السريع (دقيقتين)</h2>
+      ${s.first?'<div class="note">أول جلسة في هذا الأسبوع: هذا قياس قبل التعليم، طبيعي يغلط.</div>':''}
+      <p class="muted">اعرضي البطاقة واتركيه يقرأ لحاله. <b>لا مساعدة ولا تلميح ولا «متأكد؟».</b></p>
+      <div class="dots">${p.map((x,i)=>`<i class="${x.r} ${i===pIdx?'cur':''}"></i>`).join('')}</div>
+      <div class="big" id="pc" style="cursor:pointer">${esc(it.item)}</div>
+      <div class="row"><button class="btn ok grow" data-r="ok">قرأها صح ✓</button><button class="btn no grow" data-r="no">خطأ / ما عرف ✗</button></div>
+      <p class="muted" style="text-align:center">اضغطي البطاقة لعرضها بملء الشاشة. النتيجة تظهر في الختام.</p>`;
+  } else if(step===1){
+    body = `<h2>٢. التعليم (٧ دقائق)</h2><p>${esc(w.teach)}</p><div class="note good">هنا المساعدة مسموحة.</div>
+      <div class="chips">${w.cards.map((c,i)=>`<span class="chip" data-i="${i}">${esc(c)}</span>`).join('')}</div>
+      <button class="btn" id="showAll">اعرض البطاقات بملء الشاشة</button>`;
+  } else if(step===2){
+    body = `<h2>٣. الدمج (٥ دقائق)</h2><p>${esc(w.blendTip)}</p><p class="muted">الإصبع دائماً يبدأ من أول حرف على اليمين.</p>
+      <div class="chips">${w.blend.map((c,i)=>`<span class="chip" data-b="${i}">${esc(c)}</span>`).join('')}</div>
+      <button class="btn" id="showBlend">اعرض بملء الشاشة</button>`;
+  } else if(step===3){
+    body = `<h2>٤. الكتابة (٣ دقائق)</h2><p>أمليها عليه واحدة واحدة بدون ما يشوفها. بعدها سجلي:</p>
+      <table>${w.write.map((x,i)=>`<tr><td style="font-family:var(--f-stim);font-size:24px">${esc(x)}</td>
+      <td><div class="seg" data-w="${i}">${[['ok','صح'],['part','جزئي'],['no','خطأ']].map(([v,l])=>`<button type="button" data-v="${v}" aria-pressed="${(s.write||{})[i]===v}">${l}</button>`).join('')}</div></td></tr>`).join('')}</table>`;
+  } else if(step===4){
+    body = `<h2>٥. الأعداد (٣ دقائق)</h2><p>${esc(w.num)}</p>
+      <label class="f">وين وصل بدون خطأ؟ أو كيف كان أداؤه؟<input id="num" value="${esc(s.num)}" placeholder="مثلاً: وصل ١٢، خلط ٧ و٨"></label>`;
+  } else {
+    body = `<h2>٦. الختام</h2><p>اختمي ببطاقة يعرفها أكيد، وامدحي محاولته.</p>
+      <label class="f">مزاجه<select id="mood">${[['','—'],['calm','هادئ ومتعاون'],['ok','عادي'],['tense','متوتر / متشتت'],['tired','تعبان / نعسان']].map(([v,l])=>`<option value="${v}" ${s.mood===v?'selected':''}>${l}</option>`).join('')}</select></label>
+      <label class="f">ملاحظات (وش صعب عليه؟ وش لفت انتباهك؟)<textarea id="note">${esc(s.note)}</textarea></label>
+      <p class="muted">نتيجة الفحص: <b>${score(s)}</b></p>`;
+  }
+  $('#main').innerHTML = `<div class="card">${head}</div><div class="card">${body}${nav}</div>
+    <div class="row"><button class="btn" id="leave">→ رجوع للصفحة الرئيسية (الجلسة محفوظة)</button></div>`;
+
+  const q = s2 => $('#main').querySelector(s2);
+  if(step===0){
+    live(s.probe[pIdx].item);
+    q('#pc').onclick = () => stage([s.probe[pIdx].item]);
+    $('#main').querySelectorAll('[data-r]').forEach(b => b.onclick = () => {
+      upd(d => { d.probe[pIdx].r = b.dataset.r; });
+      if(pIdx<3) pIdx++; render();
+    });
+  }
+  if(step===1){ $('#main').querySelectorAll('.chip').forEach(c => c.onclick = () => stage(w.cards,+c.dataset.i)); q('#showAll').onclick = () => stage(w.cards,0); }
+  if(step===2){ $('#main').querySelectorAll('.chip').forEach(c => c.onclick = () => stage(w.blend,+c.dataset.b)); q('#showBlend').onclick = () => stage(w.blend,0); }
+  if(step===3) $('#main').querySelectorAll('[data-w] button').forEach(b => b.onclick = () => { const i=b.closest('[data-w]').dataset.w; upd(d => { d.write = d.write||{}; d.write[i] = b.dataset.v; }); render(); });
+  if(step===4) q('#num').oninput = e => upd(d => { d.num = e.target.value; });
+  if(step===5){ q('#mood').onchange = e => upd(d => { d.mood = e.target.value; }); q('#note').oninput = e => upd(d => { d.note = e.target.value; }); }
+  q('#back').onclick = () => { step--; render(); };
+  if(q('#fwd')) q('#fwd').onclick = () => { step++; render(); };
+  if(q('#finish')) q('#finish').onclick = () => { upd(d => { d.done = true; }); view='home'; cur=null; render(); };
+  q('#leave').onclick = () => { view='home'; cur=null; render(); };
+}
+
+function renderSchool(){
+  const w = week();
+  const mine = sessions().filter(s => s.by==='school');
+  const td = mine.find(s => s.date===today());
+  $('#main').innerHTML = `
+  <div class="card">
+    <h2>للمعلم: الأسبوع ${w.n} — ${esc(w.title)}</h2>
+    <p class="muted">شكراً لمشاركتك. المطلوب ١٠ دقائق يومياً بنفس البطاقات ونفس الطريقة اللي نستخدمها في البيت. القياس يتم في البيت، فما يحتاج تختبره.</p>
+    <h3>الطريقة</h3><p>${esc(w.teach)}</p>
+    <div class="chips">${w.cards.map((c,i)=>`<span class="chip" data-i="${i}">${esc(c)}</span>`).join('')}</div>
+    <h3>الدمج</h3><p>${esc(w.blendTip)}</p>
+    <div class="chips">${w.blend.map((c,i)=>`<span class="chip" data-b="${i}">${esc(c)}</span>`).join('')}</div>
+    <h3>الأعداد</h3><p>${esc(w.num)}</p>
+    <div class="note">مهم: القراءة دائماً بالإصبع من أول حرف على اليمين، والحركة قبل الكلمة. يرجى عدم استخدام أسماء الحروف (ألف، باء) أثناء القراءة، فقط أصواتها.</div>
+  </div>
+  <div class="card">
+    <h2>سجل اليوم (${today()})</h2>
+    <label class="f">وش درّبته عليه؟<input id="did" value="${esc(td?.did)}" placeholder="مثلاً: بطاقات الضمة + العدّ إلى ١٠"></label>
+    <label class="f">وش كان صعب عليه؟<textarea id="hard">${esc(td?.hard)}</textarea></label>
+    <label class="f">المدة بالدقائق<input id="min" inputmode="numeric" value="${esc(td?.min)}"></label>
+  </div>
+  <div class="card"><h2>أيامك السابقة</h2>${mine.length?`<table>${mine.slice(0,20).map(s=>`<tr><td>${esc(s.date)}</td><td>${esc(s.did)}</td><td class="muted">${esc(s.hard)}</td></tr>`).join('')}</table>`:'<p class="muted">لا يوجد بعد.</p>'}</div>`;
+  $('#main').querySelectorAll('.chip[data-i]').forEach(c => c.onclick = () => stage(w.cards,+c.dataset.i));
+  $('#main').querySelectorAll('.chip[data-b]').forEach(c => c.onclick = () => stage(w.blend,+c.dataset.b));
+  const id = td ? td.id : 'sc'+today().replace(/-/g,'');
+  const base = () => recs['plan/s-'+id] || {by:'school', date: today(), week: w.n, created: Date.now(), done:true};
+  ['did','hard','min'].forEach(k => $('#'+k).oninput = e => save('plan/s-'+id, {...base(), [k]: e.target.value}));
+}
+
+$('#who').addEventListener('click', e => { const b = e.target.closest('button[data-who]'); if(!b) return; who = b.dataset.who; try{localStorage.setItem('jawad-who',who);}catch(e){} view='home'; render(); });
+
+render();
+if(!window.convex){ setSave('err'); } else {
+const client = new convex.ConvexClient("https://cheerful-civet-746.convex.cloud");
+const api = convex.anyApi;
+put = (path, data) => client.mutation(api.records.put, {path, data});
+let first = true;
+client.onUpdate(api.records.all, {}, rows => {
+  const editing = document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+  rows.forEach(r => { if(r.path.startsWith('plan/') && !dirty.has(r.path)) recs[r.path] = r.data; });
+  if(!dirty.size) setSave('ok');
+  if(CHILD || first || !editing){ first = false; render(); }
+});
+}
+</script>
+</body>
+</html>

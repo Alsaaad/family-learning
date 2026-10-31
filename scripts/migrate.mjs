@@ -10,3 +10,11 @@ const v = await call(OLD, 'query', 'progress:dashboard', { code: process.env.PAR
 if (!v) throw new Error('old parent code rejected')
 const n = await call(NEW, 'mutation', 'migrate:importSessions', { code: W, kid: 'jehad', sessions: v.sessions, progress: v.snapshot ? v.snapshot.progress : null })
 console.log(`imported ${n} of ${v.sessions.length} sessions`)
+
+// جواد: من little-spider-313 إلى القاعدة الجديدة
+const JOLD = 'https://little-spider-313.eu-west-1.convex.cloud'
+const rows = await call(JOLD, 'query', 'records:all', {})
+const have = new Set((await call(NEW, 'query', 'records:all', {})).map(r => r.path))
+let k = 0
+for (const r of rows) if (!have.has(r.path)) { await call(NEW, 'mutation', 'records:put', { path: r.path, data: r.data }); k++ }
+console.log(`jawad: copied ${k} of ${rows.length} records`)

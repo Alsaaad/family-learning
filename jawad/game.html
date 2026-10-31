@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>اسمع واختار</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Amiri:wght@700&display=swap">
+<style>
+[hidden]{display:none!important}
+:root{--bg:#fdf8ef;--surface:#fff;--ink:#1d2b2f;--muted:#6b7678;--line:#e6dccb;--accent:#0f5b62;--accent-ink:#fff;--star:#e0a100;--soft:#eef5f4;
+  --f-body:'IBM Plex Sans Arabic',Tahoma,sans-serif;--f-stim:'Amiri','Traditional Arabic',serif}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#121a1c;--surface:#1a2528;--ink:#e6eeee;--muted:#9aa9ab;--line:#2c3b3f;--accent:#62b4bb;--accent-ink:#0b1416;--soft:#1d3134;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);min-height:100vh}
+.wrap{max-width:720px;margin:0 auto;padding:16px}
+.top{display:flex;align-items:center;gap:10px}
+.stars{font-size:28px;color:var(--star);font-weight:700;flex:1}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:10px 16px;font:inherit;font-size:15px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.hear{display:block;margin:28px auto 18px;width:120px;height:120px;border-radius:50%;border:none;background:var(--accent);color:var(--accent-ink);font-size:54px;cursor:pointer}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px}
+.opt{font-family:var(--f-stim);font-size:min(22vw,130px);line-height:1.4;background:var(--surface);border:3px solid var(--line);border-radius:22px;cursor:pointer;color:var(--ink);padding:6px 0}
+.opt.show{border-color:var(--accent);background:var(--soft)}
+.opt.win{border-color:var(--star);transform:scale(1.04);transition:transform .2s}
+.msg{text-align:center;font-size:20px;min-height:34px;margin-top:14px;color:var(--muted)}
+.end{text-align:center;padding:40px 0}
+.end .big{font-size:80px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:14px}
+.rec{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.rec .t{font-family:var(--f-stim);font-size:34px;width:110px}
+.rec .s{font-size:13px;color:var(--muted);flex:1}
+.muted{color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><p class="muted">جارٍ التحميل…</p></div>
+<script src="https://cdn.jsdelivr.net/npm/convex@1.42.2/dist/browser.bundle.js"></script>
+<script>
+const WEEKS = [
+  ['بَ','بُ','مَ','مُ','لَ','لُ','سَ','سُ'],
+  ['بِ','مِ','لِ','سِ','بُ','مَ','لُ','سَ'],
+  ['بَا','بُو','بِي','مَا','مُو','نَ','نُ','تِ'],
+  ['بَاب','نَام','سُور','نُور','تُوت','دَار','دُود','رِيم'],
+  ['سَمَك','لَبَن','قَلَم','بَلَد','كَتَبَ','دَرَسَ','رَسَمَ','نَزَلَ'],
+  ['نَامَ تَامِر','رَسَمَ بَاب','لَبَن بَارِد','قَلَم سَامِي','كَتَبَ نُور','سَمَك كَبِير']
+];
+const ROUND = 10;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const hex = s => [...s].map(c => c.codePointAt(0).toString(16)).join('-');
+const day = () => new Date().toLocaleDateString('en-CA');
+const REC = location.hash === '#rec';
+let recs = {}, put = null, ready = false;
+
+function weekN(){ return Math.min(Math.max(((recs['plan/state']||{}).week|0)||1,1),6); }
+function cards(){ return WEEKS[weekN()-1]; }
+function audio(item){ const a = recs['plan/a-'+hex(item)]; return a && a.d ? a.d : null; }
+function recorded(){ return cards().filter(audio); }
+function play(item){ const d = audio(item); if(!d) return Promise.resolve(); const a = new Audio(d); return new Promise(r => { a.onended = r; a.onerror = r; a.play().catch(r); }); }
+
+/* ---------- Game ---------- */
+let g = null;
+function newGame(){ g = {n:0, stars:0, cur:null, locked:false, log:[]}; next(); }
+function pickPair(){
+  const pool = recorded(); const item = pool[Math.floor(Math.random()*pool.length)];
+  const same = pool.filter(c => c!==item && c[0]===item[0]);
+  const others = same.length ? same : pool.filter(c => c!==item);
+  const other = others[Math.floor(Math.random()*others.length)];
+  return {item, opts: Math.random()<.5 ? [item,other] : [other,item]};
+}
+function next(){
+  if(g.n >= ROUND) return endGame();
+  g.cur = pickPair(); g.locked = false; g.tries = 0; renderGame(); setTimeout(() => play(g.cur.item), 400);
+}
+function renderGame(){
+  $('#app').innerHTML = `
+    <div class="top"><div class="stars">⭐ ${g.stars}</div><span class="muted">${g.n+1} / ${ROUND}</span></div>
+    <button class="hear" id="hear" aria-label="اسمع">🔊</button>
+    <div class="opts">${g.cur.opts.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}</div>
+    <div class="msg" id="msg">اسمع، واضغط الكلمة اللي سمعتها</div>`;
+  $('#hear').onclick = () => play(g.cur.item);
+  document.querySelectorAll('.opt').forEach(b => b.onclick = () => choose(+b.dataset.i, b));
+}
+async function choose(i, btn){
+  if(g.locked) return; g.locked = true;
+  const right = g.cur.opts[i] === g.cur.item;
+  if(g.tries === 0) g.log.push({item:g.cur.item, ok:right, at:Date.now()});
+  if(right){
+    btn.classList.add('win'); if(g.tries===0) g.stars++;
+    $('#msg').textContent = ['ممتاز!','رائع!','أحسنت!','بطل!'][Math.floor(Math.random()*4)];
+    document.querySelector('.stars').textContent = '⭐ ' + g.stars;
+    saveLog(); g.n++; setTimeout(next, 1100);
+  } else {
+    g.tries++;
+    const ci = g.cur.opts.indexOf(g.cur.item);
+    const cb = document.querySelector(`.opt[data-i="${ci}"]`);
+    cb.classList.add('show'); $('#msg').textContent = 'اسمع مرة ثانية، هذي هي';
+    await play(g.cur.item);
+    if(g.tries >= 2){ g.n++; setTimeout(next, 700); return; }
+    setTimeout(() => { cb.classList.remove('show'); $('#msg').textContent = 'جرّب تضغطها'; g.locked = false; }, 300);
+  }
+}
+function endGame(){
+  $('#app').innerHTML = `<div class="end"><div class="big">🏆</div><h2>خلصت الجولة!</h2><p style="font-size:26px;color:var(--star)">⭐ ${g.stars}</p>
+    <button class="btn primary" id="again">العب مرة ثانية</button></div>`;
+  $('#again').onclick = newGame;
+}
+function saveLog(){
+  if(!put) return;
+  const path = 'plan/g-' + day().replace(/-/g,'');
+  const prev = (recs[path] && recs[path].plays) ? recs[path] : {date: day(), plays: []};
+  const known = new Set(prev.plays.map(p => p.at));
+  const data = {date: day(), week: weekN(), plays: prev.plays.concat(g.log.filter(p => !known.has(p.at)))};
+  recs[path] = data; put(path, data).catch(()=>{});
+}
+
+/* ---------- Recording (for the sister) ---------- */
+let mr = null, chunks = [], recItem = null;
+function renderRec(msg){
+  $('#app').innerHTML = `
+    <h2 style="margin:4px 0">تسجيل أصوات الأسبوع ${weekN()}</h2>
+    <p class="muted">سجّلي كل بطاقة بصوت واضح وهادئ، مرة وحدة. اضغطي «سجّلي»، انطقي البطاقة، ثم «إيقاف». تقدرين تعيدين التسجيل أي وقت.</p>
+    ${msg ? `<p style="color:#a2392b">${esc(msg)}</p>` : ''}
+    <div class="card">${cards().map(c => `<div class="rec"><span class="t">${esc(c)}</span>
+      <span class="s">${audio(c) ? 'مسجّل ✓' : 'غير مسجّل'}</span>
+      ${audio(c) ? `<button class="btn" data-play="${esc(c)}">▶</button>` : ''}
+      <button class="btn ${recItem===c?'primary':''}" data-rec="${esc(c)}">${recItem===c ? '■ إيقاف' : '● سجّلي'}</button></div>`).join('')}</div>
+    <p class="muted">اللعبة تشتغل إذا انسجلت بطاقتين على الأقل. رابط اللعبة لجواد: <b>${esc(location.href.split('#')[0])}</b></p>`;
+  document.querySelectorAll('[data-play]').forEach(b => b.onclick = () => play(b.dataset.play));
+  document.querySelectorAll('[data-rec]').forEach(b => b.onclick = () => toggleRec(b.dataset.rec));
+}
+async function toggleRec(item){
+  if(mr && recItem === item){ mr.stop(); return; }
+  if(mr) return;
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({audio:true}); }
+  catch(e){ return renderRec('ما قدرنا نوصل للمايكروفون. اسمحي للمتصفح باستخدامه وجربي مرة ثانية.'); }
+  chunks = []; recItem = item;
+  mr = new MediaRecorder(stream);
+  mr.ondataavailable = e => chunks.push(e.data);
+  mr.onstop = () => {
+    stream.getTracks().forEach(t => t.stop());
+    const blob = new Blob(chunks, {type: mr.mimeType || 'audio/webm'});
+    mr = null; const it = recItem; recItem = null;
+    if(blob.size > 600000){ return renderRec('التسجيل طويل. سجّلي البطاقة بس (ثانية أو ثانيتين).'); }
+    const fr = new FileReader();
+    fr.onload = () => { const data = {d: fr.result}; recs['plan/a-'+hex(it)] = data; put('plan/a-'+hex(it), data).then(() => renderRec()).catch(() => renderRec('ما انحفظ التسجيل، تأكدي من الاتصال.')); renderRec(); };
+    fr.readAsDataURL(blob);
+  };
+  mr.start(); renderRec();
+  setTimeout(() => { if(mr && recItem === item) mr.stop(); }, 4000);
+}
+
+/* ---------- Start ---------- */
+function render(){
+  if(REC) return renderRec();
+  if(recorded().length < 2){
+    $('#app').innerHTML = `<div class="end"><div class="big">🎧</div><h2>اللعبة تجهز قريباً</h2><p class="muted">لازم تسجّل أختك أصوات بطاقات الأسبوع أول.</p></div>`;
+    return;
+  }
+  if(!g) startScreen();
+}
+function startScreen(){
+  $('#app').innerHTML = `<div class="end"><div class="big">🎧</div><h2>اسمع واختار</h2><p class="muted" style="font-size:17px">تسمع صوت، وتختار البطاقة الصح</p>
+    <button class="btn primary" id="go" style="font-size:22px;padding:14px 36px">ابدأ</button></div>`;
+  $('#go').onclick = newGame;
+}
+if(!window.convex){ $('#app').innerHTML = '<p class="muted">تعذر الاتصال. تأكد من الإنترنت.</p>'; }
+else {
+  const client = new convex.ConvexClient("https://cheerful-civet-746.convex.cloud");
+  put = (path, data) => client.mutation(convex.anyApi.records.put, {path, data});
+  client.onUpdate(convex.anyApi.records.all, {}, rows => {
+    rows.forEach(r => { if(r.path.startsWith('plan/')) recs[r.path] = r.data; });
+    if(!ready){ ready = true; render(); }
+    else if(REC && !mr) renderRec();
+  });
+}
+</script>
+</body>
+</html>
