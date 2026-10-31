@@ -1,10 +1,12 @@
-import { internalMutation } from "./_generated/server"
+import { mutation } from "./_generated/server"
 import { v } from "convex/values"
+import { WRITE_CODE } from "./codes"
 
 /** نقل سجل المهام من القاعدة القديمة (Macaly) — يُشغَّل مرة واحدة من GitHub Actions */
-export const importSessions = internalMutation({
-  args: { kid: v.string(), sessions: v.array(v.any()), progress: v.any() },
+export const importSessions = mutation({
+  args: { code: v.string(), kid: v.string(), sessions: v.array(v.any()), progress: v.any() },
   handler: async (ctx, a) => {
+    if (a.code !== WRITE_CODE) throw new Error("unauthorized")
     const have = await ctx.db.query("sessions").withIndex("by_kid_created", (q) => q.eq("kid", a.kid)).collect()
     const seen = new Set(have.map((s) => `${s.createdAt}`))
     let n = 0

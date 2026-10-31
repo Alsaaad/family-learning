@@ -21,7 +21,5 @@ jobs:
           npx convex deploy --typecheck disable -y > /tmp/o.txt 2>&1 || { echo "::error::$(tail -c 900 /tmp/o.txt | tr '\n' ' ')"; exit 1; }
       - name: Import Jehad history (safe to repeat)
         run: |
-          node scripts/migrate.mjs > /tmp/m.json
-          npx convex run migrate:importSessions "$(cat /tmp/m.json)" > /tmp/o.txt 2>&1 || { echo "::error::$(tail -c 600 /tmp/o.txt | tr '\n' ' ')"; exit 1; }
-          echo "::notice::imported $(tail -c 50 /tmp/o.txt)"
-# deployment: bright-fly-404
+          node scripts/migrate.mjs > /tmp/o.txt 2>&1 || { echo "::error::$(tail -c 600 /tmp/o.txt | tr '\n' ' ')"; exit 1; }
+          echo "::notice::$(cat /tmp/o.txt)"
