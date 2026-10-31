@@ -25,3 +25,4 @@ jobs:
         run: |
           node scripts/migrate.mjs > /tmp/m.json
           npx convex run migrate:importSessions "$(cat /tmp/m.json)"
+# deployment: bright-fly-404
