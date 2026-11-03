@@ -650,6 +650,7 @@ $('#rateToggle').onclick = () => {
    التبويبات
    ========================================================= */
 function showTab(id){
+  if(!document.getElementById(id)) id = 'mission';
   stopSpeech(); if(window.stopAyah) window.stopAyah(); stopRec();
   $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
   $$('.panel').forEach(p => p.classList.toggle('active', p.id === id));
@@ -901,7 +902,7 @@ showTab(state.tab || 'stories');
 <script src="sync.js?v=3"></script>
 <script src="../shared/pass.js?v=2"></script>
 <script src="pass-setup.js?v=1"></script>
-<script src="mission.js?v=8"></script>
+<script src="mission.js?v=9"></script>
 <script src="guide.js?v=3"></script>
 <script src="solo.js?v=2"></script>
 <!-- science-ui.js: قسم مذاكرة الاختبارات — يُفعَّل عند الحاجة -->
