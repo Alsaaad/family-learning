@@ -13,7 +13,15 @@
     common: ['عادي', '#8E959C'], uncommon: ['غير شائع', '#3FA34D'], rare: ['نادر', '#2F80ED'],
     epic: ['ملحمي', '#9B51E0'], legendary: ['أسطوري', '#E8892B']
   };
-  const SEASON = { n: 1, name: 'الموسم ١: أبطال الحروف', tiers: 30, xpPerTier: 1500 };
+  /* موسم كل أسبوعين (يبدأ يوم الأحد) — ٢٠ مستوى، والمقتنيات تبقى، والـ XP يبدأ من الصفر كل موسم */
+  const S0 = Date.UTC(2026, 10, 1), SNAMES = ['أبطال الحروف', 'عاصفة الصحراء', 'ليلة النجوم', 'جزيرة التنين', 'مدينة الروبوتات', 'قمم الجليد', 'بركان الغضب', 'الغابة السرية'];
+  const ARN = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+  const SEASON = (() => {
+    const n = Math.max(1, Math.floor((Date.now() - S0) / (14 * 864e5)) + 1);
+    const end = new Date(S0 + n * 14 * 864e5);
+    return { n, name: `الموسم ${ARN(n)}: ${SNAMES[(n - 1) % SNAMES.length]}`, tiers: 20, xpPerTier: 1200,
+      daysLeft: Math.max(1, Math.ceil((end - Date.now()) / 864e5)) };
+  })();
 
   /* ---------- الشخصيات (SVG من تصميمنا) ---------- */
   const SKINS = {
@@ -53,10 +61,18 @@
   const item = id => { const [c, k] = id.split(':'); return CAT[c] && CAT[c][k] ? Object.assign({ id, cat: c, key: k }, CAT[c][k]) : null; };
 
   /* المستويات: جائزة لكل مستوى */
-  const TIERS = ['emote:wave', 'coins:100', 'back:bag', 'skin:green', 'coins:100', 'glider:kite', 'emote:jump', 'back:cat',
+  const POOL = ['emote:wave', 'coins:100', 'back:bag', 'skin:green', 'coins:100', 'glider:kite', 'emote:jump', 'back:cat',
     'coins:150', 'skin:falcon', 'emote:flex', 'back:moon', 'coins:150', 'glider:balloon', 'skin:ice', 'coins:200',
     'back:swords', 'emote:spin', 'skin:ninja', 'coins:200', 'glider:rocket', 'back:wings', 'emote:robot', 'skin:astro',
     'coins:300', 'back:jet', 'skin:lava', 'glider:dragon', 'back:minidragon', 'skin:knight'];
+  /* كل موسم ٢٠ جائزة مختلفة من المجموعة، والأخيرة دائمًا شخصية أسطورية أو ملحمية */
+  const TIERS = (() => {
+    const off = ((SEASON.n - 1) * 7) % POOL.length, t = [];
+    for (let k = 0; t.length < 19; k++) t.push(POOL[(off + k) % POOL.length]);
+    const tops = ['skin:knight', 'skin:dragon', 'skin:hero', 'skin:cyber', 'skin:lava', 'skin:astro', 'skin:ninja'];
+    t.push(tops[(SEASON.n - 1) % tops.length]);
+    return t.map((id, k) => (id.startsWith('coins:') ? id : t.indexOf(id) === k ? id : 'coins:150'));
+  })();
   const SHOP = [['skin:shadow', 400], ['skin:robo', 800], ['skin:jungle', 800], ['skin:cyber', 1200], ['skin:dragon', 2000],
     ['skin:hero', 2000], ['emote:star', 900], ['back:shield', 300], ['glider:umbrella', 200]];
 
@@ -95,21 +111,23 @@
   let C = null, D = null, root = null;
   const today = () => new Date().toLocaleDateString('en-CA');
   const weekOf = () => { const d = new Date(); d.setDate(d.getDate() - ((d.getDay() + 1) % 7)); return d.toLocaleDateString('en-CA'); }; // يبدأ السبت
-  const fresh = () => ({ season: 1, xp: 0, coins: 0, owned: ['skin:rookie'], eq: { skin: 'rookie', back: null, emote: null, glider: null },
+  const fresh = () => ({ season: SEASON.n, xp: 0, coins: 0, owned: ['skin:rookie'], eq: { skin: 'rookie', back: null, emote: null, glider: null },
     q: { date: today(), p: {}, done: [] }, w: { date: weekOf(), p: {}, done: [] }, rev: 0, seen: 0 });
   const tierOf = xp => Math.min(SEASON.tiers, Math.floor(xp / SEASON.xpPerTier));
   function data() {
     if (!D) D = Object.assign(fresh(), C.load() || {});
+    if ((D.season || 1) !== SEASON.n) { D.season = SEASON.n; D.xp = 0; D.prevBest = Math.max(D.prevBest || 0, D.lastTier || 0); }
     if (D.q.date !== today()) D.q = { date: today(), p: {}, done: [] };
     if (D.w.date !== weekOf()) D.w = { date: weekOf(), p: {}, done: [] };
     return D;
   }
-  function commit() { D.rev = (D.rev || 0) + 1; D.at = Date.now(); C.save(D); renderChip(); }
+  function commit() { D.lastTier = tierOf(D.xp); D.rev = (D.rev || 0) + 1; D.at = Date.now(); C.save(D); renderChip(); }
 
   function grant(id) {
     const d = data();
     if (id.startsWith('coins:')) { d.coins += +id.split(':')[1]; return; }
-    if (!d.owned.includes(id)) d.owned.push(id);
+    if (d.owned.includes(id)) { d.coins += 150; return 'dup'; }
+    d.owned.push(id);
   }
   function xp(n, reason) {
     if (!C || !n) return;
@@ -117,7 +135,7 @@
     d.xp += Math.round(n);
     const after = tierOf(d.xp);
     const won = [];
-    for (let t = before + 1; t <= after; t++) { const id = TIERS[t - 1]; if (id) { grant(id); won.push({ t, id }); } }
+    for (let t = before + 1; t <= after; t++) { const id = TIERS[t - 1]; if (id) { const dup = grant(id) === 'dup'; won.push({ t, id: dup ? 'coins:150' : id }); } }
     commit();
     floatXP(n, reason);
     if (won.length) setTimeout(() => later(() => levelUp(won)), 900);
@@ -184,7 +202,7 @@
     const tabs = [['pass', '🎟️ الباتل باس'], ['quests', '🎯 المهام'], ['locker', '🧥 الخزانة'], ['shop', '🛒 المتجر']];
     let body = '';
     if (tab === 'pass') {
-      body = `<p class="fp-sub">${SEASON.name} — كل ${SEASON.xpPerTier} XP تفتح مستوى جديد</p>
+      body = `<p class="fp-sub">${SEASON.name} — باقي ${ARN(SEASON.daysLeft)} ${SEASON.daysLeft > 2 && SEASON.daysLeft < 11 ? 'أيام' : 'يوم'} على نهاية الموسم ⏳ • كل ${SEASON.xpPerTier} XP مستوى جديد</p>
         <div class="fp-xpbar"><u style="width:${t >= SEASON.tiers ? 100 : Math.round((d.xp % SEASON.xpPerTier) / SEASON.xpPerTier * 100)}%"></u>
         <span>المستوى ${t} • ${t >= SEASON.tiers ? 'أكملت الموسم! 🏆' : `${SEASON.xpPerTier - d.xp % SEASON.xpPerTier} XP للمستوى التالي`}</span></div>
         <div class="fp-tiers">${TIERS.map((id, k) => {

@@ -98,8 +98,11 @@ export function mergeStates(a: S | null, b: S): S {
   // الباتل باس: النسخة الأحدث (rev) تفوز، والمقتنيات تُجمع من الجهتين
   if (a.pass || inc.pass) {
     const pa = a.pass || {}, pb = inc.pass || {}
-    const win = (pb.rev || 0) >= (pa.rev || 0) ? pb : pa
-    out.pass = { ...win, xp: Math.max(pa.xp || 0, pb.xp || 0),
+    const sa = pa.season || 1, sb = pb.season || 1
+    const win = sa !== sb ? (sb > sa ? pb : pa) : (pb.rev || 0) >= (pa.rev || 0) ? pb : pa
+    const same = (x: any) => (x.season || 1) === (win.season || 1)
+    out.pass = { ...win, xp: Math.max(same(pa) ? pa.xp || 0 : 0, same(pb) ? pb.xp || 0 : 0),
+      coins: win.coins,
       owned: Array.from(new Set([...(pa.owned || []), ...(pb.owned || [])])) }
   }
   out.quranArchive = { ...(a.quranArchive || {}), ...(inc.quranArchive || {}) }
