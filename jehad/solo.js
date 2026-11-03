@@ -84,6 +84,77 @@
     box.querySelectorAll('.aw').forEach(el => el.onclick = async () => { stop(); hl(+el.dataset.j); await playUrl(wordUrl(cur, +el.dataset.j)); hl(-1); });
     const sel = document.getElementById('soSel'); if (sel) sel.value = cur;
   }
+  /* 🧩 رتّب الآية: الكلمات مبعثرة، يضغطها بالترتيب — التطبيق يصحّح */
+  function arrange() {
+    stop();
+    const w = AYAT[cur].w, order = w.map((_, j) => j).sort(() => Math.random() - .5);
+    let next = 0, miss = 0;
+    const box = document.getElementById('soTool');
+    const draw = () => {
+      box.innerHTML = `<div class="so-arr">
+        <p class="so-built ayah">${w.slice(0, next).join(' ') || '<span class="so-ph">اضغط الكلمة الأولى…</span>'}</p>
+        <div class="so-words">${order.map(j => j < next ? '' : `<button class="so-w" data-j="${j}">${w[j]}</button>`).join('')}</div></div>`;
+      box.querySelectorAll('.so-w').forEach(b => b.onclick = () => {
+        const j = +b.dataset.j;
+        if (j === next) {
+          next++; playUrl(wordUrl(cur, j));
+          if (next === w.length) {
+            box.innerHTML = `<div class="so-arr"><p class="so-built ayah">${w.join(' ')}</p><p class="so-ok">${miss ? `🌟 رتّبتها! (${ar(miss)} محاولة خاطئة)` : '🏆 رتّبتها من أول مرة!'}</p>
+              <div class="controls m-center"><button class="btn primary" id="soArr2">🔁 مرة ثانية</button></div></div>`;
+            document.getElementById('soArr2').onclick = arrange;
+            log('arrange', miss); confetti(miss ? 50 : 120);
+            if (window.FamilyPass) { FamilyPass.progress('arrange'); FamilyPass.xp(miss ? 150 : 250, '🧩'); }
+            return;
+          }
+          draw();
+        } else { miss++; b.classList.add('so-bad'); setTimeout(() => b.classList.remove('so-bad'), 500); }
+      });
+    };
+    draw();
+  }
+  /* 🎙️ سجّل تسميعك: يسمّع من حفظه ويسجّل، ثم يسمع نفسه ويقارن بالشيخ. التسجيل يُرسل ليسمعه عبدالله أو أخته */
+  let mr = null;
+  function recordUI(msg) {
+    stop();
+    const box = document.getElementById('soTool');
+    box.innerHTML = `<div class="so-arr">
+      <p>🙈 غطِّ الآية، ثم اضغط «ابدأ» وسمّع الآية ${ar(cur + 1)} من حفظك.</p>
+      ${typeof msg === 'string' ? `<p class="so-ok">${msg}</p>` : ''}
+      <div class="controls m-center"><button class="btn primary" id="soRecGo">${mr ? '⏹ انتهيت' : '🔴 ابدأ التسجيل'}</button></div>
+      <div id="soRecOut"></div></div>`;
+    document.getElementById('soRecGo').onclick = toggleRec;
+    if (!mr) panel.querySelector('#soAyah').classList.add('so-cover');
+  }
+  async function toggleRec() {
+    if (mr) { mr.stop(); return; }
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+    catch (e) { recordUI('نحتاج إذن الميكروفون 🎤'); return; }
+    const chunks = [], ayah = cur;
+    mr = new MediaRecorder(stream);
+    mr.ondataavailable = e => chunks.push(e.data);
+    mr.onstop = () => {
+      stream.getTracks().forEach(t => t.stop()); mr = null;
+      panel.querySelector('#soAyah').classList.remove('so-cover');
+      const blob = new Blob(chunks, { type: chunks[0] && chunks[0].type || 'audio/mp4' });
+      const url = URL.createObjectURL(blob);
+      recordUI('✅ سجّلتها! اسمع نفسك ثم اسمع الشيخ وقارن.');
+      document.getElementById('soRecOut').innerHTML = `<audio controls src="${url}"></audio>
+        <div class="controls m-center"><button class="btn blue" id="soSheikh">🔊 اسمع الشيخ</button></div>`;
+      document.getElementById('soSheikh').onclick = () => playAyahAudio(ayah, qSession);
+      log('record', 1);
+      if (window.FamilyPass) { FamilyPass.progress('record'); FamilyPass.xp(200, '🎙️'); }
+      if (blob.size < 700000 && window.JEHAD_SYNC) {
+        const fr = new FileReader();
+        fr.onload = () => fetch(`${JEHAD_SYNC.url}/api/mutation`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: 'records:put', format: 'json', args: { path: `jehad-rec/${today()}-${ayah + 1}-${Date.now()}`,
+            data: { kid: 'jehad', date: today(), ayah: ayah + 1, surah: QN, d: fr.result } } }) }).catch(() => {});
+        fr.readAsDataURL(blob);
+      }
+    };
+    mr.start(); recordUI();
+    setTimeout(() => { if (mr) mr.stop(); }, 60000);
+  }
   function render() {
     if (cur === null) cur = defAyah();
     const mins = state.soloLog.filter(x => x.date === today()).length;
@@ -102,6 +173,11 @@
           <button class="btn" id="soList">🎧 راجع كل محفوظي</button>
           <button class="btn" id="soStop" style="display:none">⏹ إيقاف</button>
         </div>
+        <div class="controls">
+          <button class="btn primary" id="soArr">🧩 رتّب الآية</button>
+          <button class="btn blue" id="soRec">🎙️ سجّل تسميعك</button>
+        </div>
+        <div id="soTool"></div>
         <p class="note">${mins ? `👏 تدرّبت اليوم ${ar(mins)} ${mins > 2 ? 'مرات' : 'مرة'}.` : '🌱 لم تتدرّب اليوم بعد.'} الاستماع قبل النوم يثبّت الحفظ.</p>
       </article>`;
     renderAyahBox();
@@ -110,6 +186,8 @@
     document.getElementById('soLoop').onclick = loop;
     document.getElementById('soBuild').onclick = build;
     document.getElementById('soList').onclick = playlist;
+    document.getElementById('soArr').onclick = arrange;
+    document.getElementById('soRec').onclick = recordUI;
     document.getElementById('soStop').onclick = stop;
   }
   const origShow = window.showTab;

@@ -9,7 +9,9 @@
       { id: 'mission', icon: '🚀', title: 'أنهِ مهمة اليوم', xp: 500 },
       { id: 'story', icon: '📖', title: 'أنهِ قصة', xp: 300 },
       { id: 'quran', icon: '🌙', title: 'سمّع آية من حفظك صح', xp: 300 },
-      { id: 'listen', icon: '🎧', title: 'تدرّب وحدك على القرآن (وحدي)', xp: 200 }
+      { id: 'listen', icon: '🎧', title: 'تدرّب وحدك على القرآن (وحدي)', xp: 200 },
+      { id: 'arrange', icon: '🧩', title: 'رتّب آيتين (وحدي)', xp: 300, goal: 2 },
+      { id: 'record', icon: '🎙️', title: 'سجّل تسميعك لآية (وحدي)', xp: 300 }
     ],
     weekly: [
       { id: 'mission', icon: '🔥', title: 'أنهِ ٥ مهام هذا الأسبوع', xp: 2000, goal: 5 },

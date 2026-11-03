@@ -211,6 +211,8 @@ pre{white-space:pre-wrap;font-family:inherit;background:var(--surface);border-ra
           }).join('')}</tbody></table>` : '<p class="muted">لا توجد مهام بعد.</p>'}
       </div>
 
+      <div class="card" id="recsCard"><h2>🎙️ تسميعات جهاد المسجّلة</h2><p class="muted">… جارٍ التحميل</p></div>
+
       <div class="card guide">
         <h2>🧭 كيف أقرأ هذه الصفحة؟</h2>
         <ul>
@@ -221,6 +223,18 @@ pre{white-space:pre-wrap;font-family:inherit;background:var(--surface);border-ra
         </ul>
       </div>`;
     document.getElementById('refresh').onclick = refresh;
+    loadRecs();
+  }
+  async function loadRecs() {
+    const el = document.getElementById('recsCard'); if (!el) return;
+    try {
+      const r = await fetch(`${C.url}/api/query`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: 'records:all', args: {}, format: 'json' }) });
+      const rows = ((await r.json()).value || []).filter(x => x.path.startsWith('jehad-rec/')).sort((a, b) => a.path < b.path ? 1 : -1).slice(0, 12);
+      el.innerHTML = `<h2>🎙️ تسميعات جهاد المسجّلة</h2>` + (rows.length ? rows.map(x =>
+        `<div style="margin:8px 0"><b>${esc(x.data.date)}</b> — ${esc(x.data.surah || '')} الآية ${ar(x.data.ayah)}<br><audio controls preload="none" src="${x.data.d}" style="width:100%"></audio></div>`).join('')
+        : '<p class="muted">لا توجد تسجيلات بعد. يسجّلها جهاد من «🎧 وحدي» ← «🎙️ سجّل تسميعك».</p>');
+    } catch (e) { el.innerHTML = '<h2>🎙️ تسميعات جهاد</h2><p class="muted">تعذّر التحميل.</p>'; }
   }
 
   async function refresh() {
