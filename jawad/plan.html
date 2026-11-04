@@ -176,6 +176,13 @@ function renderHome(){
     </div>
   </div>
   <div class="card">
+    <h2>⭐ إنجازات جواد</h2>
+    ${(() => { const won = [...new Set(ss.filter(s => s.by==='home').flatMap(s => (s.probe||[]).filter(x => x.r==='ok').map(x => x.item)))];
+      return won.length ? `<p class="muted">بطاقات قرأها لحاله في الفحص. ورّيه إياها في بداية الجلسة أو نهايتها: «شوف كل هذي صرت تعرفها».</p>
+      <div class="chips">${won.map(c=>`<span class="chip">⭐ ${esc(c)}</span>`).join('')}</div>
+      <button class="btn primary" id="showWins">اعرضها لجواد</button>` : '<p class="muted">تظهر هنا البطاقات اللي يقرأها لحاله.</p>'; })()}
+  </div>
+  <div class="card">
     <h2>الجلسات</h2>
     ${ss.length ? `<table><tr><th>التاريخ</th><th>من</th><th>الأسبوع</th><th>الفحص</th><th>ملاحظة</th></tr>
     ${ss.slice(0,30).map(s=>`<tr><td>${esc(s.date)}</td><td>${s.by==='school'?'المدرسة':'البيت'}</td><td>${s.week||''}</td><td class="res">${s.by==='school'?'—':score(s)+(s.done?'':' (لم تكتمل)')}</td><td class="muted">${esc((s.note||s.hard||'').slice(0,60))}</td></tr>`).join('')}</table>` : '<p class="muted">لا توجد جلسات بعد.</p>'}
@@ -198,10 +205,14 @@ function renderHome(){
       <li>في التعليم: إذا أخطأ قولي الصح مباشرة وخليه يكرره.</li>
       <li>إذا بدأ يتكلم بموضوع ثاني: «بعد هالبطاقة نتكلم».</li>
       <li>اختمي دايم بشي ينجح فيه.</li>
+      <li>إذا غلط ٣ مرات ورا بعض: ارجعي لشي سهل يعرفه، ثم كمّلي.</li>
+      <li>امدحي المحاولة والطريقة («عجبني إنك جربت مرة ثانية»)، مو الذكاء («أنت ذكي»).</li>
+      <li>إذا قال «ما أعرف»: «لسه، بنتدرب عليها»، وساعديه بالقدر اللي يكمل فيه بس.</li>
     </ul>
   </div>`;
   $('#main').querySelectorAll('.chip').forEach(c => c.onclick = () => stage(w.cards, +c.dataset.i));
   $('#copyChild').onclick = () => { const i=$('#childUrl'); i.select(); try{navigator.clipboard.writeText(i.value);}catch(e){} $('#copyChild').textContent='تم ✓'; };
+  if($('#showWins')) $('#showWins').onclick = () => stage([...document.querySelectorAll('.chip')].filter(c=>c.textContent.startsWith('⭐')).map(c=>c.textContent), 0);
   $('#startBtn').onclick = () => startSession('home', open);
   $('#nextW').onclick = () => { if(!m && !confirmInline('nextW')) return; save('plan/state', {...state(), week: w.n+1}); render(); };
   $('#prevW').onclick = () => { save('plan/state', {...state(), week: w.n-1}); render(); };
@@ -239,7 +250,7 @@ function renderSession(){
       <div class="row"><button class="btn ok grow" data-r="ok">قرأها صح ✓</button><button class="btn no grow" data-r="no">خطأ / ما عرف ✗</button></div>
       <p class="muted" style="text-align:center">اضغطي البطاقة لعرضها بملء الشاشة. النتيجة تظهر في الختام.</p>`;
   } else if(step===1){
-    body = `<h2>٢. التعليم (٧ دقائق)</h2><p>${esc(w.teach)}</p><div class="note good">هنا المساعدة مسموحة.</div>
+    body = `<h2>٢. التعليم (٧ دقائق)</h2><p>${esc(w.teach)}</p><div class="note good">هنا المساعدة مسموحة.</div><div class="note">قاعدة النجاح: إذا غلط في ٣ بطاقات ورا بعض، ارجعي لبطاقة يعرفها أكيد، وامدحي محاولته، ثم كمّلي. الهدف إنه ينجح في ٨ من كل ١٠ محاولات تقريباً.</div>
       <div class="chips">${w.cards.map((c,i)=>`<span class="chip" data-i="${i}">${esc(c)}</span>`).join('')}</div>
       <button class="btn" id="showAll">اعرض البطاقات بملء الشاشة</button>`;
   } else if(step===2){
